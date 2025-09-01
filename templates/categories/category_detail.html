@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.name }} - SWAPNEST{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Category Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        {% if category.image %}
+                            <img src="{{ category.image.url }}" alt="{{ category.name }}" 
+                                 class="me-4 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                        {% else %}
+                            <i class="fas fa-tag me-4" style="font-size: 4rem;"></i>
+                        {% endif %}
+                        <div>
+                            <h1 class="mb-2">{{ category.name }}</h1>
+                            {% if category.description %}
+                                <p class="mb-2">{{ category.description }}</p>
+                            {% endif %}
+                            <p class="mb-0">
+                                <i class="fas fa-box me-2"></i>{{ products_count }} products available
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subcategories -->
+    {% if subcategories %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <h5 class="mb-3">Subcategories</h5>
+                <div class="row">
+                    {% for subcategory in subcategories %}
+                        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-3">
+                            <a href="{% url 'categories:category_detail' subcategory.slug %}" 
+                               class="btn btn-outline-primary w-100 text-truncate">
+                                {{ subcategory.name }}
+                                <br>
+                                <small>({{ subcategory.products.count }})</small>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Products -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Products in {{ category.name }}</h5>
+                <a href="{% url 'products:search' %}?category={{ category.id }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-search me-1"></i>Advanced Search
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for product in products %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
+                        {% if product.main_image %}
+                            <img src="{{ product.main_image }}" alt="{{ product.title }}" 
+                                 class="card-img-top" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                 style="height: 200px;">
+                                <i class="fas fa-image text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h6 class="card-title text-dark">{{ product.title|truncatechars:50 }}</h6>
+                            <p class="text-primary fw-bold mb-2">₹{{ product.price }}</p>
+                            <p class="text-muted small mb-1">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ product.city }}
+                            </p>
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-clock me-1"></i>{{ product.created_at|timesince }} ago
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-info">{{ product.get_condition_display }}</span>
+                                {% if product.is_negotiable %}
+                                    <small class="text-success">Negotiable</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-box-open text-muted" style="font-size: 5rem;"></i>
+                    <h3 class="mt-3 text-muted">No products in this category</h3>
+                    <p class="text-muted">Be the first to list an item in {{ category.name }}!</p>
+                    <a href="{% url 'products:product_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Post First Item
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Back to Categories -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{% url 'categories:category_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to All Categories
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

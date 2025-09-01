@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Edit Profile - SWAPNEST{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>Edit Profile
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <h5 class="text-primary">Basic Information</h5>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                {{ user_form.first_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ user_form.last_name|as_crispy_field }}
+                            </div>
+                            <div class="col-12">
+                                {{ user_form.email|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12 mb-3">
+                                <h5 class="text-primary">Contact & Location</h5>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                {{ profile_form.phone|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ profile_form.city|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ profile_form.state|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ profile_form.country|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ profile_form.postal_code|as_crispy_field }}
+                            </div>
+                            <div class="col-12">
+                                {{ profile_form.address|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12 mb-3">
+                                <h5 class="text-primary">College Information</h5>
+                                <hr>
+                            </div>
+                            <div class="col-12">
+                                {{ profile_form.college_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ profile_form.course|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ profile_form.graduation_year|as_crispy_field }}
+                            </div>
+                            <div class="col-12">
+                                {{ profile_form.graduation_status|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12 mb-3">
+                                <h5 class="text-primary">Personal Details</h5>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                {{ profile_form.date_of_birth|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ profile_form.profile_image|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex gap-3">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-save me-2"></i>Save Changes
+                                    </button>
+                                    <a href="{% url 'accounts:profile' %}" class="btn btn-secondary btn-lg">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

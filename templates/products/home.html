@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SWAPNEST - College Student Marketplace{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-3">From Seniors to Juniors</h1>
+                <p class="lead mb-4">The exclusive marketplace for college graduates to sell their belongings to current students. Books, gadgets, furniture - pass them forward!</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'products:search' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-search me-2"></i>Find College Deals
+                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'products:product_create' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-graduation-cap me-2"></i>Sell to Juniors
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:register' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-user-graduate me-2"></i>Join Community
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <i class="fas fa-exchange-alt" style="font-size: 8rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+{% if categories %}
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Shop by Category</h2>
+        <div class="row">
+            {% for category in categories %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <a href="{% url 'categories:category_detail' category.slug %}" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm h-100 category-card">
+                            <div class="card-body text-center">
+                                {% if category.image %}
+                                    <img src="{{ category.image.url }}" alt="{{ category.name }}" 
+                                         class="img-fluid mb-3" style="height: 80px; object-fit: cover;">
+                                {% else %}
+                                    <i class="fas fa-tag text-primary mb-3" style="font-size: 3rem;"></i>
+                                {% endif %}
+                                <h5 class="card-title">{{ category.name }}</h5>
+                                <p class="text-muted small">{{ category.products.count }} items</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'categories:category_list' %}" class="btn btn-outline-primary">
+                View All Categories
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Featured Products -->
+{% if featured_products %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Featured Products</h2>
+        <div class="row">
+            {% for product in featured_products %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
+                            {% if product.main_image %}
+                                <img src="{{ product.main_image }}" alt="{{ product.title }}" 
+                                     class="card-img-top" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                     style="height: 200px;">
+                                    <i class="fas fa-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h6 class="card-title text-dark">{{ product.title|truncatechars:50 }}</h6>
+                                <p class="text-primary fw-bold mb-2">₹{{ product.price }}</p>
+                                <p class="text-muted small mb-1">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ product.city }}
+                                </p>
+                                <p class="text-muted small">
+                                    <i class="fas fa-clock me-1"></i>{{ product.created_at|timesince }} ago
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Recent Products -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Latest Products</h2>
+        <div class="row">
+            {% for product in products %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
+                            {% if product.main_image %}
+                                <img src="{{ product.main_image }}" alt="{{ product.title }}" 
+                                     class="card-img-top" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                     style="height: 200px;">
+                                    <i class="fas fa-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h6 class="card-title text-dark">{{ product.title|truncatechars:50 }}</h6>
+                                <p class="text-primary fw-bold mb-2">₹{{ product.price }}</p>
+                                <p class="text-muted small mb-1">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ product.city }}
+                                </p>
+                                <p class="text-muted small">
+                                    <i class="fas fa-clock me-1"></i>{{ product.created_at|timesince }} ago
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center">
+                    <p class="text-muted">No products available yet. Be the first to post!</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'products:product_create' %}" class="btn btn-primary">Post Your First Ad</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+            <div class="d-flex justify-content-center mt-4">
+                <nav>
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.category-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}
