@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-a!%9z1!tcdo)#f%z6%wjl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', True)
 
-ALLOWED_HOSTS = ["swapnest.pythonanywhere.com"]
+ALLOWED_HOSTS = ["swapnest.pythonanywhere.com", "*"]
 
 
 # Application definition
