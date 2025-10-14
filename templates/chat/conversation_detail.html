@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load chat_filters %}
 
 {% block title %}Chat - {{ conversation.product.title }} - STUDYSWAP{% endblock %}
 
@@ -11,7 +12,7 @@
             <div class="card mb-3">
                 <div class="card-header bg-primary text-white">
                     <div class="row align-items-center">
-                        <div class="col-md-8">
+                        <div class="col-md-7">
                             <div class="d-flex align-items-center">
                                 <a href="{% url 'chat:conversation_list' %}" class="text-white me-3">
                                     <i class="fas fa-arrow-left"></i>
@@ -25,10 +26,14 @@
                                     <small class="text-light">
                                         Chat with {{ other_user.get_full_name|default:other_user.username }}
                                     </small>
+                                    <br>
+                                    <small id="connectionStatus" class="badge bg-success">
+                                        <i class="fas fa-circle me-1" style="font-size: 0.6em;"></i>Connected
+                                    </small>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4 text-end">
+                        <div class="col-md-5 text-end">
                             <span class="badge bg-light text-dark">
                                 ₹{{ conversation.product.price }}
                             </span>
@@ -45,8 +50,8 @@
             <div class="card">
                 <div class="card-body p-0">
                     <div class="chat-container" id="chatContainer" style="height: 400px; overflow-y: auto;">
-                        {% if messages %}
-                            {% for message in messages reversed %}
+                        {% if chat_messages %}
+                            {% for message in chat_messages %}
                                 <div class="message-bubble {% if message.sender == request.user %}sent{% else %}received{% endif %} p-3 m-2">
                                     <div class="message-content">
                                         <div class="message-header d-flex justify-content-between align-items-center mb-2">
@@ -58,7 +63,7 @@
                                             </small>
                                         </div>
                                         <div class="message-text">
-                                            {{ message.content|linebreaks }}
+                                            {{ message.content|mask_phone_numbers|linebreaks }}
                                         </div>
                                         {% if message.sender == request.user %}
                                             <div class="text-end mt-1">
@@ -85,7 +90,7 @@
                 
                 <!-- Message Input -->
                 <div class="card-footer">
-                    <form method="post" id="messageForm">
+                    <form id="messageForm">
                         {% csrf_token %}
                         <div class="input-group">
                             {{ message_form.content }}
@@ -93,15 +98,18 @@
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
+                        <small class="text-muted d-block mt-1">
+                            <i class="fas fa-info-circle me-1"></i>Messages are sent in real-time. Press Enter to send, Shift+Enter for new line.
+                        </small>
                     </form>
                 </div>
             </div>
 
             <!-- Pagination for older messages -->
-            {% if messages.has_other_pages %}
+            {% if chat_messages.has_other_pages %}
                 <div class="text-center mt-3">
-                    {% if messages.has_previous %}
-                        <a href="?page={{ messages.previous_page_number }}" class="btn btn-outline-primary btn-sm">
+                    {% if chat_messages.has_previous %}
+                        <a href="?page={{ chat_messages.previous_page_number }}" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-chevron-up me-1"></i>Load Older Messages
                         </a>
                     {% endif %}
@@ -176,6 +184,204 @@
 </style>
 
 <script>
+// WebSocket connection for real-time chat
+const conversationId = {{ conversation.pk }};
+const currentUserId = {{ request.user.id }};
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const chatSocket = new WebSocket(
+    protocol + '//' + window.location.host + '/ws/chat/' + conversationId + '/'
+);
+
+let typingTimer;
+const typingTimeout = 1000;
+
+chatSocket.onopen = function(e) {
+    console.log('WebSocket connection established');
+    updateConnectionStatus('connected');
+};
+
+chatSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    
+    if (data.type === 'message') {
+        // Add new message to chat
+        addMessageToChat(data);
+    } else if (data.type === 'typing') {
+        // Show/hide typing indicator
+        handleTypingIndicator(data);
+    }
+};
+
+chatSocket.onclose = function(e) {
+    console.log('WebSocket connection closed');
+    updateConnectionStatus('disconnected');
+    // Show reconnection message
+    showReconnectionMessage();
+};
+
+chatSocket.onerror = function(e) {
+    console.error('WebSocket error:', e);
+    updateConnectionStatus('error');
+};
+
+function updateConnectionStatus(status) {
+    const statusBadge = document.getElementById('connectionStatus');
+    if (statusBadge) {
+        if (status === 'connected') {
+            statusBadge.className = 'badge bg-success';
+            statusBadge.innerHTML = '<i class="fas fa-circle me-1" style="font-size: 0.6em;"></i>Connected';
+        } else if (status === 'disconnected') {
+            statusBadge.className = 'badge bg-secondary';
+            statusBadge.innerHTML = '<i class="fas fa-circle me-1" style="font-size: 0.6em;"></i>Disconnected';
+        } else if (status === 'error') {
+            statusBadge.className = 'badge bg-danger';
+            statusBadge.innerHTML = '<i class="fas fa-exclamation-circle me-1" style="font-size: 0.6em;"></i>Error';
+        }
+    }
+}
+
+function addMessageToChat(data) {
+    const chatContainer = document.getElementById('chatContainer');
+    const isOwnMessage = data.sender_id === currentUserId;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message-bubble ${isOwnMessage ? 'sent' : 'received'} p-3 m-2`;
+    messageDiv.style.animation = 'fadeIn 0.3s ease-in';
+    
+    // Mask phone numbers in the message
+    const maskedMessage = maskPhoneNumbers(data.message);
+    
+    messageDiv.innerHTML = `
+        <div class="message-content">
+            <div class="message-header d-flex justify-content-between align-items-center mb-2">
+                <strong class="message-sender">${data.sender_name}</strong>
+                <small class="text-muted message-time">${data.timestamp}</small>
+            </div>
+            <div class="message-text">${escapeHtml(maskedMessage)}</div>
+            ${isOwnMessage ? `
+                <div class="text-end mt-1">
+                    <small class="text-muted">
+                        <i class="fas fa-check" title="Sent"></i>
+                    </small>
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]).replace(/\n/g, '<br>');
+}
+
+function maskPhoneNumbers(text) {
+    if (!text) return text;
+    
+    // Array of regex patterns to match phone numbers
+    const patterns = [
+        // Indian numbers with +91 country code
+        /\+91[\s-]?\d{5}[\s-]?\d{5}/g,
+        /\+91[\s-]?\d{10}/g,
+        
+        // Indian numbers with 0 prefix
+        /\b0\d{10}\b/g,
+        
+        // 10-digit numbers starting with 6-9 (Indian mobile)
+        /\b[6-9]\d{9}\b/g,
+        
+        // Numbers with spaces/hyphens/dots
+        /\b\d{3}[\s.-]\d{3}[\s.-]\d{4}\b/g,
+        /\b\d{5}[\s.-]\d{5}\b/g,
+        
+        // Numbers with parentheses
+        /\(\d{3}\)[\s.-]?\d{3}[\s.-]?\d{4}/g,
+        
+        // International format
+        /\+\d{1,3}[\s.-]?\d{3,4}[\s.-]?\d{3,4}[\s.-]?\d{3,4}/g,
+        /\+\d{1,3}[\s.-]?\d{10,12}/g
+    ];
+    
+    let maskedText = text;
+    
+    patterns.forEach(pattern => {
+        maskedText = maskedText.replace(pattern, (match) => {
+            // Replace all digits with asterisks while keeping format
+            return match.replace(/\d/g, '*');
+        });
+    });
+    
+    return maskedText;
+}
+
+function handleTypingIndicator(data) {
+    const typingIndicator = document.getElementById('typingIndicator');
+    if (!typingIndicator) {
+        const chatContainer = document.getElementById('chatContainer');
+        const indicator = document.createElement('div');
+        indicator.id = 'typingIndicator';
+        indicator.className = 'typing-indicator p-2 m-2 text-muted';
+        indicator.innerHTML = '<em><i class="fas fa-circle-notch fa-spin me-2"></i>' + data.user + ' is typing...</em>';
+        chatContainer.appendChild(indicator);
+    }
+    
+    if (!data.is_typing) {
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+}
+
+function showReconnectionMessage() {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'alert alert-warning text-center m-3';
+    messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Connection lost. Please refresh the page to reconnect.';
+    document.getElementById('chatContainer').appendChild(messageDiv);
+}
+
+// Send message on form submit
+document.getElementById('messageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const messageInput = document.getElementById('id_content');
+    const message = messageInput.value.trim();
+    
+    if (message) {
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+        
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+    }
+});
+
+// Typing indicator
+const messageInput = document.getElementById('id_content');
+messageInput.addEventListener('input', function() {
+    clearTimeout(typingTimer);
+    
+    // Send typing started
+    chatSocket.send(JSON.stringify({
+        'typing': true
+    }));
+    
+    // Set timeout to send typing stopped
+    typingTimer = setTimeout(() => {
+        chatSocket.send(JSON.stringify({
+            'typing': false
+        }));
+    }, typingTimeout);
+});
+
 // Auto-scroll to bottom of chat
 document.addEventListener('DOMContentLoaded', function() {
     const chatContainer = document.getElementById('chatContainer');
@@ -195,7 +401,8 @@ document.addEventListener('DOMContentLoaded', function() {
         textarea.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                document.getElementById('messageForm').submit();
+                // Trigger the form submit event which will be handled by WebSocket
+                document.getElementById('messageForm').dispatchEvent(new Event('submit'));
             }
         });
     }

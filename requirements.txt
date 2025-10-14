@@ -4,3 +4,6 @@ django-crispy-forms==2.1
 crispy-bootstrap5==0.7
 django-widget-tweaks==1.5.0
 python-decouple==3.8
+channels==4.3.1
+channels-redis==4.3.0
+daphne==4.2.1

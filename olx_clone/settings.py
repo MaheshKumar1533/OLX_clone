@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ["swapnest.pythonanywhere.com", "*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',  # Must be first for Channels to work
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # Third party apps
+    'channels',
     'crispy_forms',
     'crispy_bootstrap5',
     'widget_tweaks',
@@ -152,3 +154,22 @@ LOGOUT_REDIRECT_URL = 'products:home'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Channels Configuration
+ASGI_APPLICATION = 'olx_clone.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
+
+# For production, use Redis:
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [('127.0.0.1', 6379)],
+#         },
+#     },
+# }

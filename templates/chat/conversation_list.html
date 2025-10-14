@@ -8,12 +8,22 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>
-                    <i class="fas fa-comments me-2"></i>My Conversations
-                </h2>
-                <a href="{% url 'chat:search' %}" class="btn btn-outline-primary">
-                    <i class="fas fa-search me-2"></i>Search Chats
-                </a>
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-comments me-2"></i>My Conversations
+                    </h2>
+                    <small class="text-muted" id="lastUpdated">
+                        <i class="fas fa-clock me-1"></i>Auto-refreshing every 10 seconds
+                    </small>
+                </div>
+                <div class="btn-group">
+                    <button onclick="manualRefresh()" class="btn btn-outline-secondary" title="Refresh conversations">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                    <a href="{% url 'chat:search' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-search me-2"></i>Search
+                    </a>
+                </div>
             </div>
 
             {% if conversations %}
@@ -157,4 +167,107 @@
     min-width: 0;
 }
 </style>
+
+<script>
+// Auto-refresh conversation list every 30 seconds to show new messages
+let refreshInterval;
+
+function refreshConversationList() {
+    // Store scroll position
+    const scrollPos = window.scrollY;
+    
+    fetch(window.location.href, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        // Parse the HTML and extract just the conversation cards
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newConversations = doc.querySelector('.row');
+        
+        if (newConversations) {
+            const currentContainer = document.querySelector('.row');
+            if (currentContainer) {
+                // Update only if there are changes
+                if (currentContainer.innerHTML !== newConversations.innerHTML) {
+                    currentContainer.innerHTML = newConversations.innerHTML;
+                    console.log('Conversation list updated');
+                    
+                    // Show update notification
+                    showUpdateNotification();
+                }
+            }
+        }
+        
+        // Update last refreshed time
+        updateLastRefreshTime();
+        
+        // Restore scroll position
+        window.scrollTo(0, scrollPos);
+    })
+    .catch(error => {
+        console.error('Error refreshing conversations:', error);
+    });
+}
+
+function updateLastRefreshTime() {
+    const lastUpdated = document.getElementById('lastUpdated');
+    if (lastUpdated) {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString();
+        lastUpdated.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i>Last updated: ${timeStr}`;
+    }
+}
+
+function showUpdateNotification() {
+    // Create a small toast notification
+    const toast = document.createElement('div');
+    toast.className = 'position-fixed top-0 end-0 m-3 alert alert-success alert-dismissible fade show';
+    toast.style.zIndex = '9999';
+    toast.innerHTML = `
+        <i class="fas fa-sync-alt me-2"></i>Conversations updated
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Start auto-refresh when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Refresh every 10 seconds
+    refreshInterval = setInterval(refreshConversationList, 10000);
+    
+    console.log('Auto-refresh enabled for conversation list');
+});
+
+// Stop refresh when leaving page
+window.addEventListener('beforeunload', function() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+});
+
+// Manual refresh button functionality
+function manualRefresh() {
+    refreshConversationList();
+    
+    // Show feedback
+    const btn = event.target.closest('button');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+    
+    setTimeout(() => {
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+    }, 1000);
+}
+</script>
 {% endblock %}

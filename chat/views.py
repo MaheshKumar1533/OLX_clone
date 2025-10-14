@@ -54,13 +54,13 @@ class ConversationDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         conversation = self.get_object()
         
-        # Get messages and paginate them
-        messages_list = conversation.messages.select_related('sender').all()
+        # Get messages in ascending order (oldest first) and paginate them
+        messages_list = conversation.messages.select_related('sender').order_by('created_at')
         paginator = Paginator(messages_list, 20)  # 20 messages per page
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
-        context['messages'] = page_obj
+        context['chat_messages'] = page_obj
         context['message_form'] = MessageForm()
         other_user_func = conversation.other_user
         context['other_user'] = other_user_func(self.request.user)
