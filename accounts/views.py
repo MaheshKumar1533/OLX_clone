@@ -18,7 +18,7 @@ class RegisterView(CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         login(self.request, self.object)
-        messages.success(self.request, 'Registration successful! Welcome to SWAPNEST.')
+        messages.success(self.request, 'Registration successful! Welcome to STUDYSWAP.')
         return response
 
 class ProfileView(LoginRequiredMixin, TemplateView):

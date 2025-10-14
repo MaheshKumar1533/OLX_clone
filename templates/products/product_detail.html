@@ -2,7 +2,7 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
-{% block title %}{{ product.title }} - SWAPNEST{% endblock %}
+{% block title %}{{ product.title }} - STUDYSWAP{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -80,6 +80,11 @@
                 <div class="d-grid gap-2 mb-4">
                     {% if user.is_authenticated %}
                         {% if user != product.seller %}
+                            <!-- Chat Button -->
+                            <a href="{% url 'chat:start_conversation' product.id %}" class="btn btn-success btn-lg">
+                                <i class="fas fa-comment-dots me-2"></i>Chat with Seller
+                            </a>
+                            
                             <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#contactModal">
                                 <i class="fas fa-envelope me-2"></i>Contact Seller
                             </button>

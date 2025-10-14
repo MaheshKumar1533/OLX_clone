@@ -1,10 +1,11 @@
-# SWAPNEST - Django Marketplace Application
+# STUDYSWAP - Django Marketplace Application
 
 A full-featured marketplace application built with Django, where users can buy and sell products through a modern, intuitive platform.
 
 ## Features
 
 ### User Features
+
 - User registration and authentication
 - User profiles with personal information
 - Password reset functionality
@@ -16,6 +17,7 @@ A full-featured marketplace application built with Django, where users can buy a
 - Personal dashboard with user's products
 
 ### Product Features
+
 - Multiple product categories and subcategories
 - Image upload support
 - Product condition tracking
@@ -26,6 +28,7 @@ A full-featured marketplace application built with Django, where users can buy a
 - Featured products
 
 ### Admin Features
+
 - Django admin interface
 - User and product management
 - Category management
@@ -44,42 +47,50 @@ A full-featured marketplace application built with Django, where users can buy a
 ## Installation and Setup
 
 ### Prerequisites
+
 - Python 3.8 or higher
 - pip (Python package manager)
 
 ### Steps
 
 1. **Clone the repository**
+
    ```bash
    cd /home/mahi/Projects/OLX_clone
    ```
 
 2. **Install dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Setup environment variables**
+
    - The `.env` file is already configured with default settings
    - For production, update the settings in `.env` file
 
 4. **Run migrations**
+
    ```bash
    python manage.py makemigrations
    python manage.py migrate
    ```
 
 5. **Load sample data**
+
    ```bash
    python manage.py load_sample_categories
    ```
 
 6. **Create superuser**
+
    ```bash
    python manage.py createsuperuser
    ```
 
 7. **Run the development server**
+
    ```bash
    python manage.py runserver
    ```
@@ -91,7 +102,7 @@ A full-featured marketplace application built with Django, where users can buy a
 ## Project Structure
 
 ```
-SWAPNEST/
+STUDYSWAP/
 ├── accounts/              # User authentication and profiles
 ├── categories/            # Product categories management
 ├── products/             # Product listings and search
@@ -107,16 +118,19 @@ SWAPNEST/
 ## Key Models
 
 ### User Profile
+
 - Extended user model with profile information
 - Phone, address, profile image
 - Automatic profile creation on user registration
 
 ### Categories
+
 - Hierarchical category structure (parent/child)
 - Category slugs for SEO-friendly URLs
 - Active/inactive status
 
 ### Products
+
 - Complete product information
 - Multiple image support
 - Status tracking (Active/Sold/Inactive)
@@ -124,6 +138,7 @@ SWAPNEST/
 - View count and timestamps
 
 ### Additional Models
+
 - ProductImage: Multiple images per product
 - Wishlist: User's saved products
 - Contact: Buyer-seller communication
@@ -131,6 +146,7 @@ SWAPNEST/
 ## Usage Guide
 
 ### For Users
+
 1. **Registration**: Create account with email verification
 2. **Profile Setup**: Complete profile with contact information
 3. **Browse Products**: Use search filters and categories
@@ -139,6 +155,7 @@ SWAPNEST/
 6. **Communication**: Contact sellers through built-in messaging
 
 ### For Admins
+
 1. **Access Admin Panel**: Use superuser credentials
 2. **Manage Categories**: Add/edit product categories
 3. **User Management**: View user profiles and activity
@@ -148,17 +165,20 @@ SWAPNEST/
 ## Customization
 
 ### Adding New Features
+
 - Extend models in respective apps
 - Create new views and templates
 - Update URL configurations
 - Add corresponding admin interfaces
 
 ### Styling
+
 - Modify CSS in `static/css/style.css`
 - Update Bootstrap themes
 - Customize templates in `templates/` directory
 
 ### Configuration
+
 - Update settings in `olx_clone/settings.py`
 - Modify environment variables in `.env`
 - Configure email settings for notifications
@@ -166,15 +186,18 @@ SWAPNEST/
 ## Production Deployment
 
 ### Database
+
 - Switch from SQLite to PostgreSQL/MySQL
 - Update database settings in settings.py
 
 ### Static Files
+
 - Configure static file serving with nginx/Apache
 - Set up media file handling
 - Enable compression and caching
 
 ### Security
+
 - Use strong SECRET_KEY
 - Set DEBUG=False
 - Configure ALLOWED_HOSTS
@@ -182,6 +205,7 @@ SWAPNEST/
 - Implement security headers
 
 ### Performance
+
 - Enable database query optimization
 - Set up caching (Redis/Memcached)
 - Optimize images and static files
@@ -197,6 +221,7 @@ SWAPNEST/
 ## Support
 
 For issues and questions:
+
 - Check existing documentation
 - Review Django documentation
 - Create issue in repository

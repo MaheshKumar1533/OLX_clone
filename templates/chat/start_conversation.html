@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Start Conversation - {{ product.title }} - STUDYSWAP{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-comment-dots me-2"></i>Start Conversation
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Product Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            {% if product.images.first %}
+                                <img src="{{ product.images.first.image.url }}" 
+                                     class="img-fluid rounded" style="object-fit: cover; height: 120px; width: 100%;">
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                     style="height: 120px;">
+                                    <i class="fas fa-image text-muted fa-2x"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <h5 class="mb-2">{{ product.title }}</h5>
+                            <p class="text-muted mb-2">{{ product.description|truncatewords:20 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4 class="text-primary mb-0">₹{{ product.price }}</h4>
+                                <div class="text-muted">
+                                    <i class="fas fa-user me-1"></i>
+                                    {{ product.seller.get_full_name|default:product.seller.username }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Chat Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.message.id_for_label }}" class="form-label">
+                                <i class="fas fa-comment me-2"></i>Start your conversation
+                            </label>
+                            <small class="text-muted d-block mb-2">
+                                Send a message to {{ product.seller.get_full_name|default:product.seller.username }} about this product.
+                            </small>
+                            {{ form.message }}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Product
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tips for Good Communication -->
+            <div class="card mt-4 border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Tips for Better Communication
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0 small">
+                        <li>Be specific about what you want to know about the product</li>
+                        <li>Ask about the condition, usage history, and any defects</li>
+                        <li>Discuss pickup/delivery arrangements</li>
+                        <li>Be respectful and polite in your communication</li>
+                        <li>If you're a junior, mention your college and course for better connection</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

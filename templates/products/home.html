@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}SWAPNEST - College Student Marketplace{% endblock %}
+{% block title %}STUDYSWAP - College Student Marketplace{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
@@ -67,9 +67,57 @@
 </section>
 {% endif %}
 
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-12 mb-5">
+                <h2>Why Choose STUDYSWAP?</h2>
+                <p class="text-muted">Built specifically for the college community</p>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-0 h-100">
+                    <div class="card-body">
+                        <i class="fas fa-comment-dots text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h5>Direct Chat</h5>
+                        <p class="text-muted">Chat directly with sellers about products. Ask questions, negotiate prices, and arrange meetups.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-0 h-100">
+                    <div class="card-body">
+                        <i class="fas fa-bell text-success mb-3" style="font-size: 3rem;"></i>
+                        <h5>Smart Notifications</h5>
+                        <p class="text-muted">Get notified about new messages, price updates, and items matching your interests.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-0 h-100">
+                    <div class="card-body">
+                        <i class="fas fa-graduation-cap text-info mb-3" style="font-size: 3rem;"></i>
+                        <h5>College Community</h5>
+                        <p class="text-muted">Connect with students from your college. Graduates selling to current students.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-0 h-100">
+                    <div class="card-body">
+                        <i class="fas fa-shield-alt text-warning mb-3" style="font-size: 3rem;"></i>
+                        <h5>Safe & Trusted</h5>
+                        <p class="text-muted">Verified college profiles ensure you're dealing with genuine students and graduates.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Featured Products -->
 {% if featured_products %}
-<section class="py-5 bg-light">
+<section class="py-5">
     <div class="container">
         <h2 class="text-center mb-5">Featured Products</h2>
         <div class="row">

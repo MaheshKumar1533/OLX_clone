@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SWAPNEST - College Student Marketplace{% endblock %}</title>
+    <title>{% block title %}STUDYSWAP - College Student Marketplace{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -20,7 +20,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold text-primary" href="{% url 'products:home' %}">
-                <i class="fas fa-exchange-alt me-2"></i>SWAPNEST
+                <i class="fas fa-exchange-alt me-2"></i>STUDYSWAP
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -38,6 +38,26 @@
                 
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
+                        <!-- Chat Link -->
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'chat:conversation_list' %}">
+                                <i class="fas fa-comment-dots"></i>
+                                <span class="d-none d-lg-inline ms-1">Chat</span>
+                            </a>
+                        </li>
+                        
+                        <!-- Notifications Link -->
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'notifications:list' %}" id="notificationLink">
+                                <i class="fas fa-bell"></i>
+                                <span class="d-none d-lg-inline ms-1">Notifications</span>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                                      id="notificationBadge" style="font-size: 0.7em; display: none;">
+                                    0
+                                </span>
+                            </a>
+                        </li>
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user me-1"></i>{{ user.username }}
@@ -46,6 +66,9 @@
                                 <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
                                 <li><a class="dropdown-item" href="{% url 'accounts:my_products' %}">My Products</a></li>
                                 <li><a class="dropdown-item" href="{% url 'accounts:my_wishlist' %}">My Wishlist</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'chat:conversation_list' %}">My Chats</a></li>
+                                <li><a class="dropdown-item" href="{% url 'notifications:preferences' %}">Notification Settings</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Logout</a></li>
                             </ul>
@@ -94,7 +117,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
-                    <h5>SWAPNEST</h5>
+                    <h5>STUDYSWAP</h5>
                     <p>The trusted marketplace connecting college graduates with their juniors. Pass on your treasures!</p>
                 </div>
                 <div class="col-md-4">
@@ -107,19 +130,50 @@
                 </div>
                 <div class="col-md-4">
                     <h5>Contact</h5>
-                    <p><i class="fas fa-envelope me-2"></i>info@swapnest.com</p>
+                    <p><i class="fas fa-envelope me-2"></i>info@STUDYSWAP.com</p>
                     <p><i class="fas fa-phone me-2"></i>+1 234 567 8900</p>
                 </div>
             </div>
             <hr>
             <div class="text-center">
-                <p>&copy; 2024 SWAPNEST. All rights reserved.</p>
+                <p>&copy; 2024 STUDYSWAP. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Notification Counter Script -->
+    {% if user.is_authenticated %}
+    <script>
+        function updateNotificationCount() {
+            fetch('/notifications/unread-count/', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById('notificationBadge');
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error fetching notification count:', error));
+        }
+
+        // Update notification count on page load
+        document.addEventListener('DOMContentLoaded', updateNotificationCount);
+        
+        // Update every 30 seconds
+        setInterval(updateNotificationCount, 30000);
+    </script>
+    {% endif %}
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}My Conversations - STUDYSWAP{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-comments me-2"></i>My Conversations
+                </h2>
+                <a href="{% url 'chat:search' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-search me-2"></i>Search Chats
+                </a>
+            </div>
+
+            {% if conversations %}
+                <div class="row">
+                    {% for conversation in conversations %}
+                        <div class="col-lg-6 col-xl-4 mb-3">
+                            <div class="card h-100 shadow-sm conversation-card" 
+                                 onclick="window.location='{% url 'chat:conversation_detail' conversation.pk %}'">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start">
+                                        <!-- Product Image -->
+                                        <div class="me-3">
+                                            {% if conversation.product.images.first %}
+                                                <img src="{{ conversation.product.images.first.image.url }}" 
+                                                     class="rounded" width="60" height="60" style="object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                     style="width: 60px; height: 60px;">
+                                                    <i class="fas fa-image text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Conversation Details -->
+                                        <div class="flex-grow-1 min-width-0">
+                                            <h6 class="card-title mb-1 text-truncate">
+                                                {{ conversation.product.title }}
+                                            </h6>
+                                            <p class="text-muted mb-2">
+                                                <small>
+                                                    <i class="fas fa-user me-1"></i>
+                                                    {{ conversation.other_user_instance.get_full_name|default:conversation.other_user_instance.username }}
+                                                </small>
+                                            </p>
+                                            
+                                            <!-- Latest Message Preview -->
+                                            {% if conversation.latest_message %}
+                                                <p class="mb-1 text-truncate" style="font-size: 0.9rem;">
+                                                    <strong>{{ conversation.latest_message.sender.username }}:</strong>
+                                                    {{ conversation.latest_message.content|truncatewords:8 }}
+                                                </p>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    {{ conversation.latest_message.created_at|timesince }} ago
+                                                </small>
+                                            {% else %}
+                                                <p class="text-muted mb-1"><em>No messages yet</em></p>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Unread Badge -->
+                                        {% if conversation.unread_count > 0 %}
+                                            <span class="badge bg-primary ms-2">
+                                                {{ conversation.unread_count }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0 pt-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-secondary">
+                                            ₹{{ conversation.product.price }}
+                                        </span>
+                                        <small class="text-muted">
+                                            {{ conversation.updated_at|timesince }} ago
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Conversation pagination">
+                            <ul class="pagination">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                {% endif %}
+
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-comments text-muted" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4>No Conversations Yet</h4>
+                    <p class="text-muted">
+                        Start chatting with sellers by browsing products and asking questions!
+                    </p>
+                    <a href="{% url 'products:home' %}" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag me-2"></i>Browse Products
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.conversation-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.conversation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.min-width-0 {
+    min-width: 0;
+}
+</style>
+{% endblock %}

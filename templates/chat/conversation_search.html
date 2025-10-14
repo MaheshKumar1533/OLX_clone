@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Conversations - STUDYSWAP{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-search me-2"></i>Search Conversations
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control" 
+                                   placeholder="Search by product name, user name..." 
+                                   value="{{ query }}">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    {% if query %}
+                        <p class="text-muted mb-3">
+                            Search results for "<strong>{{ query }}</strong>"
+                        </p>
+                    {% endif %}
+
+                    {% if conversations %}
+                        <div class="row">
+                            {% for conversation in conversations %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100 conversation-card" 
+                                         onclick="window.location='{% url 'chat:conversation_detail' conversation.pk %}'">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-start">
+                                                {% if conversation.product.images.first %}
+                                                    <img src="{{ conversation.product.images.first.image.url }}" 
+                                                         class="rounded me-3" width="50" height="50" style="object-fit: cover;">
+                                                {% else %}
+                                                    <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" 
+                                                         style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <div class="flex-grow-1">
+                                                    <h6 class="card-title mb-1">{{ conversation.product.title }}</h6>
+                                                    <p class="text-muted mb-1 small">
+                                                        <i class="fas fa-user me-1"></i>
+                                                        {{ conversation.other_user.get_full_name|default:conversation.other_user.username }}
+                                                    </p>
+                                                    <small class="text-muted">
+                                                        {{ conversation.updated_at|timesince }} ago
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            {% if query %}
+                                <i class="fas fa-search text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-3">No conversations found matching your search.</p>
+                            {% else %}
+                                <i class="fas fa-comments text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-3">Enter a search term to find your conversations.</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.conversation-card {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.conversation-card:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}
