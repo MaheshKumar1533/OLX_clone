@@ -1,14 +1,42 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView as BaseLoginView
+from django.contrib.sessions.models import Session
 from django.views.generic import CreateView, TemplateView, UpdateView, ListView
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db import transaction
+from django.utils import timezone
 from .forms import UserRegistrationForm, UserUpdateForm, UserProfileForm
 from .models import UserProfile
 from products.models import Product, Wishlist
+
+
+class LoginView(BaseLoginView):
+    """Custom login view that logs out user from all other devices"""
+    template_name = 'accounts/login.html'
+    
+    def form_valid(self, form):
+        # Get the user before login
+        user = form.get_user()
+        
+        # Delete all existing sessions for this user
+        # Get all sessions
+        all_sessions = Session.objects.filter(expire_date__gte=timezone.now())
+        
+        for session in all_sessions:
+            session_data = session.get_decoded()
+            if session_data.get('_auth_user_id') == str(user.id):
+                session.delete()
+        
+        # Now perform the login (creates a new session)
+        response = super().form_valid(form)
+        
+        messages.success(self.request, f'Welcome back, {user.username}! You have been logged in.')
+        
+        return response
 
 class RegisterView(CreateView):
     form_class = UserRegistrationForm
@@ -17,8 +45,18 @@ class RegisterView(CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        
+        # Clear any existing sessions for this user (shouldn't be any for new user, but just in case)
+        user = self.object
+        all_sessions = Session.objects.filter(expire_date__gte=timezone.now())
+        for session in all_sessions:
+            session_data = session.get_decoded()
+            if session_data.get('_auth_user_id') == str(user.id):
+                session.delete()
+        
+        # Login the new user
         login(self.request, self.object)
-        messages.success(self.request, 'Registration successful! Welcome to STUDYSWAP.')
+        messages.success(self.request, 'Registration successful! Welcome to STUDISWAP.')
         return response
 
 class ProfileView(LoginRequiredMixin, TemplateView):

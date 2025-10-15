@@ -72,32 +72,16 @@ class ProductSearchForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+    sort_by = forms.ChoiceField(
+        choices=[
+            ('', 'Most Recent'),
+            ('price_low', 'Price: Low to High'),
+            ('price_high', 'Price: High to Low'),
+            ('title_asc', 'Title: A to Z'),
+            ('title_desc', 'Title: Z to A'),
+        ],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
-class ContactSellerForm(forms.ModelForm):
-    class Meta:
-        model = Contact
-        fields = ['message', 'buyer_phone', 'buyer_email']
-        widgets = {
-            'message': forms.Textarea(attrs={
-                'rows': 4,
-                'placeholder': 'Write your message to the seller...',
-                'class': 'form-control'
-            }),
-            'buyer_phone': forms.TextInput(attrs={
-                'placeholder': 'Your phone number',
-                'class': 'form-control'
-            }),
-            'buyer_email': forms.EmailInput(attrs={
-                'placeholder': 'Your email address',
-                'class': 'form-control'
-            })
-        }
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-        
-        if user:
-            self.fields['buyer_email'].initial = user.email
-            if hasattr(user, 'profile') and user.profile.phone:
-                self.fields['buyer_phone'].initial = user.profile.phone

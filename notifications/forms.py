@@ -40,5 +40,5 @@ class NotificationPreferenceForm(forms.ModelForm):
             'product_inquiry_notifications': 'Get notified when someone inquires about your products',
             'price_update_notifications': 'Get notified when product prices change',
             'wishlist_notifications': 'Get notified about updates to your wishlist items',
-            'marketing_notifications': 'Receive promotional offers and news about STUDYSWAP',
+            'marketing_notifications': 'Receive promotional offers and news about STUDISWAP',
         }

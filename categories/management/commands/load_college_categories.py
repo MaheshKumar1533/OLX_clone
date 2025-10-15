@@ -3,7 +3,7 @@ from django.utils.text import slugify
 from categories.models import Category
 
 class Command(BaseCommand):
-    help = 'Load college-specific categories for STUDYSWAP'
+    help = 'Load college-specific categories for STUDISWAP'
 
     def handle(self, *args, **options):
         # Clear existing categories
@@ -163,5 +163,5 @@ class Command(BaseCommand):
                     )
 
         self.stdout.write(
-            self.style.SUCCESS('Successfully loaded college-specific categories for STUDYSWAP!')
+            self.style.SUCCESS('Successfully loaded college-specific categories for STUDISWAP!')
         )

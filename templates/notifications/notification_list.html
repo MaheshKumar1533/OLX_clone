@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 
-{% block title %}Notifications - STUDYSWAP{% endblock %}
+{% block title %}Notifications - STUDISWAP{% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <div class="container py-4">
     <div class="row">
         <div class="col-12">
@@ -209,14 +210,50 @@
 </style>
 
 <script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function getCSRFToken() {
+    // Try to get from cookie first
+    let token = getCookie('csrftoken');
+    
+    // If not in cookie, try to get from input or meta tag
+    if (!token) {
+        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfInput) {
+            token = csrfInput.value;
+        }
+    }
+    
+    return token;
+}
+
 function markAsRead(notificationId) {
     fetch(`/notifications/read/${notificationId}/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-CSRFToken': getCSRFToken(),
         }
-    }).then(() => {
-        location.reload();
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        } else {
+            console.error('Failed to mark notification as read');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
     });
 }
 
@@ -225,14 +262,38 @@ function deleteNotification(notificationId) {
         fetch(`/notifications/delete/${notificationId}/`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-CSRFToken': getCSRFToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
             }
-        }).then(response => response.json())
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
-                document.querySelector(`[data-id="${notificationId}"]`).remove();
+                const notificationElement = document.querySelector(`[data-id="${notificationId}"]`);
+                if (notificationElement) {
+                    notificationElement.style.transition = 'opacity 0.3s';
+                    notificationElement.style.opacity = '0';
+                    setTimeout(() => {
+                        notificationElement.remove();
+                        // If no more notifications, reload page
+                        if (document.querySelectorAll('.notification-item').length === 0) {
+                            location.reload();
+                        }
+                    }, 300);
+                } else {
+                    location.reload();
+                }
+            } else {
+                alert('Failed to delete notification');
             }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the notification');
         });
     }
 }
@@ -242,11 +303,18 @@ function markAllRead() {
         fetch('/notifications/mark-all-read/', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-CSRFToken': getCSRFToken(),
                 'X-Requested-With': 'XMLHttpRequest'
             }
-        }).then(() => {
-            location.reload();
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to mark notifications as read');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
         });
     }
 }
@@ -256,11 +324,19 @@ function clearAll() {
         fetch('/notifications/clear-all/', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-CSRFToken': getCSRFToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
             }
-        }).then(() => {
-            location.reload();
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to clear notifications');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
         });
     }
 }

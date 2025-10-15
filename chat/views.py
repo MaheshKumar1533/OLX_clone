@@ -69,6 +69,14 @@ class ConversationDetailView(LoginRequiredMixin, DetailView):
         other_user = other_user_func(self.request.user)
         conversation.messages.filter(sender=other_user, is_read=False).update(is_read=True)
         
+        # Mark all message notifications from this conversation as read
+        Notification.objects.filter(
+            recipient=self.request.user,
+            notification_type='new_message',
+            is_read=False,
+            action_url=f'/chat/conversation/{conversation.id}/'
+        ).update(is_read=True)
+        
         return context
     
     def post(self, request, *args, **kwargs):

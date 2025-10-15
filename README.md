@@ -1,4 +1,4 @@
-# STUDYSWAP - Django Marketplace Application
+# STUDISWAP - Django Marketplace Application
 
 A full-featured marketplace application built with Django, where users can buy and sell products through a modern, intuitive platform.
 
@@ -102,7 +102,7 @@ A full-featured marketplace application built with Django, where users can buy a
 ## Project Structure
 
 ```
-STUDYSWAP/
+STUDISWAP/
 ├── accounts/              # User authentication and profiles
 ├── categories/            # Product categories management
 ├── products/             # Product listings and search

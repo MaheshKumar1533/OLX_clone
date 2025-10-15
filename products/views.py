@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils.decorators import method_decorator
 from .models import Product, ProductImage, Wishlist, Contact
-from .forms import ProductForm, ProductSearchForm, ContactSellerForm
+from .forms import ProductForm, ProductSearchForm
 from categories.models import Category
 
 class HomeView(ListView):
@@ -53,13 +53,15 @@ class ProductDetailView(DetailView):
             status='active'
         ).exclude(id=product.id).order_by('-created_at')[:6]
         
-        # Check if user has this product in wishlist
+                # Check if product is in user's wishlist
         if self.request.user.is_authenticated:
             context['in_wishlist'] = Wishlist.objects.filter(
-                user=self.request.user, product=product
+                user=self.request.user,
+                product=product
             ).exists()
+        else:
+            context['in_wishlist'] = False
         
-        context['contact_form'] = ContactSellerForm()
         return context
 
 class ProductSearchView(ListView):
@@ -103,12 +105,27 @@ class ProductSearchView(ListView):
             if condition:
                 queryset = queryset.filter(condition=condition)
 
-        return queryset.order_by('-created_at')
+        # Apply sorting
+        sort_by = self.request.GET.get('sort_by', '')
+        if sort_by == 'price_low':
+            queryset = queryset.order_by('price')
+        elif sort_by == 'price_high':
+            queryset = queryset.order_by('-price')
+        elif sort_by == 'title_asc':
+            queryset = queryset.order_by('title')
+        elif sort_by == 'title_desc':
+            queryset = queryset.order_by('-title')
+        else:
+            # Default: Most recent first
+            queryset = queryset.order_by('-created_at')
+
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_form'] = ProductSearchForm(self.request.GET)
         context['query'] = self.request.GET.get('query', '')
+        context['sort_by'] = self.request.GET.get('sort_by', '')
         return context
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
@@ -171,29 +188,6 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'Product deleted successfully!')
         return super().delete(request, *args, **kwargs)
-
-class ContactSellerView(LoginRequiredMixin, View):
-    def post(self, request, slug):
-        product = get_object_or_404(Product, slug=slug, status='active')
-        
-        # Prevent sellers from contacting themselves
-        if product.seller == request.user:
-            messages.error(request, "You cannot contact yourself!")
-            return redirect('products:product_detail', slug=slug)
-        
-        form = ContactSellerForm(request.POST, user=request.user)
-        if form.is_valid():
-            contact = form.save(commit=False)
-            contact.product = product
-            contact.buyer = request.user
-            contact.seller = product.seller
-            contact.save()
-            
-            messages.success(request, 'Your message has been sent to the seller!')
-        else:
-            messages.error(request, 'Please correct the errors in your message.')
-        
-        return redirect('products:product_detail', slug=slug)
 
 class AddToWishlistView(LoginRequiredMixin, View):
     def post(self, request, product_id):

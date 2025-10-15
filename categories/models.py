@@ -5,6 +5,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(blank=True)
+    icon = models.CharField(max_length=50, default='fas fa-tag', help_text='Font Awesome icon class (e.g., fas fa-book)')
     image = models.ImageField(upload_to='categories/', blank=True, null=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='subcategories')
     is_active = models.BooleanField(default=True)

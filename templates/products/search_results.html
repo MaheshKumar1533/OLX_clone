@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}Search Results - STUDYSWAP{% endblock %}
+{% block title %}Search Results - STUDISWAP{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -38,6 +38,9 @@
                             <div class="col-md-3">
                                 {{ search_form.condition|as_crispy_field }}
                             </div>
+                            <div class="col-md-3">
+                                {{ search_form.sort_by|as_crispy_field }}
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -48,11 +51,15 @@
     <!-- Results Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <h2>Search Results</h2>
-            {% if query %}
-                <p class="text-muted">Showing results for: <strong>"{{ query }}"</strong></p>
-            {% endif %}
-            <p class="text-muted">{{ products|length }} product(s) found</p>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>Search Results</h2>
+                    {% if query %}
+                        <p class="text-muted mb-0">Showing results for: <strong>"{{ query }}"</strong></p>
+                    {% endif %}
+                    <p class="text-muted">{{ products|length }} product(s) found</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -75,7 +82,7 @@
                             <h6 class="card-title text-dark">{{ product.title|truncatechars:50 }}</h6>
                             <p class="text-primary fw-bold mb-2">₹{{ product.price }}</p>
                             <p class="text-muted small mb-1">
-                                <i class="fas fa-tag me-1"></i>{{ product.category.name }}
+                                <i class="{{ product.category.icon }} me-1"></i>{{ product.category.name }}
                             </p>
                             <p class="text-muted small mb-1">
                                 <i class="fas fa-map-marker-alt me-1"></i>{{ product.city }}

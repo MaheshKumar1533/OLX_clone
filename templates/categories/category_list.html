@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Categories - STUDYSWAP{% endblock %}
+{% block title %}Categories - STUDISWAP{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -17,12 +17,7 @@
                 <a href="{% url 'categories:category_detail' category.slug %}" class="text-decoration-none">
                     <div class="card border-0 shadow-sm h-100 category-card">
                         <div class="card-body text-center">
-                            {% if category.image %}
-                                <img src="{{ category.image.url }}" alt="{{ category.name }}" 
-                                     class="img-fluid mb-3" style="height: 80px; object-fit: cover;">
-                            {% else %}
-                                <i class="fas fa-tag text-primary mb-3" style="font-size: 3rem;"></i>
-                            {% endif %}
+                            <i class="{{ category.icon }} text-primary mb-3" style="font-size: 3rem;"></i>
                             <h5 class="card-title text-dark">{{ category.name }}</h5>
                             <p class="text-muted small">{{ category.products.count }} items available</p>
                             {% if category.description %}
