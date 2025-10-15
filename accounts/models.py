@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils import timezone
+from datetime import timedelta
+import random
+import string
 
 class UserProfile(models.Model):
     GRADUATION_STATUS_CHOICES = [
@@ -51,3 +55,83 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+
+class OTP(models.Model):
+    """Model to store OTP for email verification and password reset"""
+    OTP_TYPE_CHOICES = [
+        ('registration', 'Registration'),
+        ('password_reset', 'Password Reset'),
+    ]
+    
+    email = models.EmailField()
+    otp_code = models.CharField(max_length=6)
+    otp_type = models.CharField(max_length=20, choices=OTP_TYPE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_verified = models.BooleanField(default=False)
+    
+    # Store temporary registration data (for registration OTPs)
+    temp_data = models.JSONField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['email', 'otp_type', 'is_verified']),
+        ]
+    
+    def __str__(self):
+        return f"{self.email} - {self.otp_type} - {self.otp_code}"
+    
+    @classmethod
+    def generate_otp(cls, email, otp_type, temp_data=None):
+        """Generate a new OTP"""
+        from django.conf import settings
+        
+        # Delete old unverified OTPs for this email and type
+        cls.objects.filter(
+            email=email,
+            otp_type=otp_type,
+            is_verified=False
+        ).delete()
+        
+        # Generate random 6-digit OTP
+        otp_code = ''.join(random.choices(string.digits, k=settings.OTP_LENGTH))
+        
+        # Set expiry time
+        expires_at = timezone.now() + timedelta(minutes=settings.OTP_EXPIRY_MINUTES)
+        
+        # Create new OTP
+        otp = cls.objects.create(
+            email=email,
+            otp_code=otp_code,
+            otp_type=otp_type,
+            expires_at=expires_at,
+            temp_data=temp_data
+        )
+        
+        return otp
+    
+    def is_valid(self):
+        """Check if OTP is still valid"""
+        return not self.is_verified and timezone.now() < self.expires_at
+    
+    @classmethod
+    def verify_otp(cls, email, otp_code, otp_type):
+        """Verify OTP and mark as used"""
+        try:
+            otp = cls.objects.get(
+                email=email,
+                otp_code=otp_code,
+                otp_type=otp_type,
+                is_verified=False
+            )
+            
+            if otp.is_valid():
+                otp.is_verified = True
+                otp.save()
+                return otp
+            else:
+                return None
+        except cls.DoesNotExist:
+            return None
