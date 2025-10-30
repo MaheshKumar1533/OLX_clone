@@ -4,25 +4,7 @@
 {% block title %}Shop - STUDISWAP{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="bg-primary text-white py-5">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <h1 class="display-4 fw-bold mb-3">From Seniors to Juniors</h1>
-                <p class="lead mb-4">The exclusive marketplace for college graduates to sell their belongings to current students. Books, gadgets, furniture - pass them forward!</p>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{% url 'products:search' %}" class="btn btn-light btn-lg">
-                        <i class="fas fa-search me-2"></i>Find College Deals
-                    </a>
-                </div>
-            </div>
-            <div class="col-lg-4 text-center">
-                <i class="fas fa-exchange-alt" style="font-size: 8rem; opacity: 0.3;"></i>
-            </div>
-        </div>
-    </div>
-</section>
+
 
 <!-- Categories Section -->
 {% if categories %}
@@ -54,11 +36,11 @@
 {% endif %}
 
 <!-- Features Section -->
-<section class="py-5 bg-light">
+<section class="py-5" style="background: transparent;">
     <div class="container">
         <div class="row text-center">
             <div class="col-12 mb-5">
-                <h2>Why Choose STUDISWAP?</h2>
+                <h2>Why Choose StudiSwap?</h2>
                 <p class="text-muted">Built specifically for the college community</p>
             </div>
             <div class="col-lg-3 col-md-6 mb-4">
@@ -217,20 +199,25 @@
 
 {% block extra_css %}
 <style>
+@keyframes grid-move {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(80px, 80px) rotate(5deg); }
+}
+
 .category-card {
-    transition: transform 0.2s ease-in-out;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .category-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-12px) rotate(-2deg);
 }
 
 .card {
-    transition: transform 0.2s ease-in-out;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-10px) scale(1.02);
 }
 </style>
 {% endblock %}

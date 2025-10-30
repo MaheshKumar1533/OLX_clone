@@ -14,9 +14,21 @@ from .models import Product, ProductImage, Wishlist, Contact
 from .forms import ProductForm, ProductSearchForm
 from categories.models import Category
 
-class HomeView(ListView):
+class LandingPageView(TemplateView):
+    template_name = 'products/landing.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['featured_products'] = Product.objects.filter(
+            status='active', is_featured=True
+        ).order_by('-created_at')[:6]
+        context['categories'] = Category.objects.filter(is_active=True, parent=None)[:6]
+        context['total_products'] = Product.objects.filter(status='active').count()
+        return context
+
+class ShopView(ListView):
     model = Product
-    template_name = 'products/home.html'
+    template_name = 'products/shop.html'
     context_object_name = 'products'
     paginate_by = 12
 

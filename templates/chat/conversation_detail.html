@@ -37,7 +37,7 @@
                             <span class="badge bg-light text-dark">
                                 ₹{{ conversation.product.price }}
                             </span>
-                            <a href="{% url 'products:product_detail' conversation.product.pk %}" 
+                            <a href="{% url 'products:product_detail' conversation.product.slug %}" 
                                class="btn btn-sm btn-outline-light ms-2">
                                 View Product
                             </a>

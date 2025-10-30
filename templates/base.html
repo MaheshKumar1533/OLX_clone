@@ -13,14 +13,79 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
+    <style>
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #3b82f6 0%, #a855f7 50%, #ec4899 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        #loading-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255, 255, 255, 0.2);
+            border-top: 8px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loader-text {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 20px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Page Transition */
+        body {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <div class="loader-text">Loading...</div>
+    </div>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background: rgba(255, 255, 255, 0.95) !important; backdrop-filter: blur(10px);">
         <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="{% url 'products:home' %}">
-                <i class="fas fa-exchange-alt me-2"></i>STUDISWAP
+            <a class="navbar-brand fw-bold text-primary" href="{% url 'products:landing' %}" style="font-size: 1.5rem;">
+                <i class="fas fa-exchange-alt me-2"></i><span style="color: #3b82f6;">S</span>tudi<span style="color: #3b82f6;">S</span>wap
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -37,6 +102,9 @@
                 </form>
                 
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'products:shop' %}">Shop</a>
+                    </li>
                     {% if user.is_authenticated %}
                         <!-- Chat Link -->
                         <li class="nav-item">
@@ -117,13 +185,14 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
-                    <h5>STUDISWAP</h5>
+                    <h5>StudiSwap</h5>
                     <p>The trusted marketplace connecting college graduates with their juniors. Pass on your treasures!</p>
                 </div>
                 <div class="col-md-4">
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
-                        <li><a href="{% url 'products:home' %}" class="text-light">Home</a></li>
+                        <li><a href="{% url 'products:landing' %}" class="text-light">Home</a></li>
+                        <li><a href="{% url 'products:shop' %}" class="text-light">Shop</a></li>
                         <li><a href="{% url 'categories:category_list' %}" class="text-light">Categories</a></li>
                         <li><a href="{% url 'products:search' %}" class="text-light">Search</a></li>
                     </ul>
@@ -136,13 +205,42 @@
             </div>
             <hr>
             <div class="text-center">
-                <p>&copy; 2025 STUDISWAP. All rights reserved.</p>
+                <p>&copy; 2025 StudiSwap. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Loading Screen Script -->
+    <script>
+        // Hide loading screen when page is fully loaded
+        window.addEventListener('load', function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            setTimeout(() => {
+                loadingScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 500);
+        });
+        
+        // Show loading screen on page navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('a:not([target="_blank"]):not([href^="#"]):not([data-bs-toggle])');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                        const loadingScreen = document.getElementById('loading-screen');
+                        loadingScreen.style.display = 'flex';
+                        loadingScreen.classList.remove('fade-out');
+                    }
+                });
+            });
+        });
+    </script>
     
     <!-- Notification Counter Script -->
     {% if user.is_authenticated %}

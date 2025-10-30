@@ -152,8 +152,8 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Login URLs
 LOGIN_URL = 'accounts:login'
-LOGIN_REDIRECT_URL = 'products:home'
-LOGOUT_REDIRECT_URL = 'products:home'
+LOGIN_REDIRECT_URL = 'products:shop'
+LOGOUT_REDIRECT_URL = 'products:landing'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

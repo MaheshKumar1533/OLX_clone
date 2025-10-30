@@ -48,7 +48,7 @@ class LoginView(BaseLoginView):
 class RegisterView(CreateView):
     form_class = UserRegistrationForm
     template_name = 'accounts/register.html'
-    success_url = reverse_lazy('products:home')
+    success_url = reverse_lazy('products:shop')
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -234,7 +234,7 @@ class RegisterVerifyOTPView(View):
                         login(request, user)
                         
                         messages.success(request, 'Account created successfully! Welcome to STUDYSWAP.')
-                        return redirect('products:home')
+                        return redirect('products:shop')
                         
                 except Exception as e:
                     messages.error(request, f'Error creating account: {str(e)}')
