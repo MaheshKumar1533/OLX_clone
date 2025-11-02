@@ -46,8 +46,10 @@
                                 {{ form.price|as_crispy_field }}
                             </div>
                             <div class="col-md-6">
-                                <div class="form-check mt-4 pt-2">
-                                    {{ form.is_negotiable }}
+                                <label class="form-label">&nbsp;</label>
+                                <div class="form-check mt-2">
+                                    <input type="checkbox" class="form-check-input" id="{{ form.is_negotiable.id_for_label }}" 
+                                           name="is_negotiable" {% if form.is_negotiable.value %}checked{% endif %}>
                                     <label class="form-check-label" for="{{ form.is_negotiable.id_for_label }}">
                                         Price is negotiable
                                     </label>
