@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordResetForm
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+import re
 from .models import UserProfile
 
 
@@ -19,11 +21,13 @@ class RegistrationStepOneForm(forms.Form):
     )
     last_name = forms.CharField(
         max_length=30,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last name'})
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last name (optional)'})
     )
     password1 = forms.CharField(
         label='Password',
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Create a password'})
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Create a password'}),
+        help_text='Password must be at least 8 characters long and contain letters and numbers.'
     )
     password2 = forms.CharField(
         label='Confirm Password',
@@ -34,13 +38,32 @@ class RegistrationStepOneForm(forms.Form):
         username = self.cleaned_data.get('username')
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError('Username already exists.')
+        if len(username) < 3:
+            raise forms.ValidationError('Username must be at least 3 characters long.')
+        if not re.match(r'^[a-zA-Z0-9_]+$', username):
+            raise forms.ValidationError('Username can only contain letters, numbers, and underscores.')
         return username
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError('Email already registered.')
-        return email
+        # Additional email validation
+        if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+            raise forms.ValidationError('Please enter a valid email address.')
+        return email.lower()
+    
+    def clean_password1(self):
+        password = self.cleaned_data.get('password1')
+        if len(password) < 8:
+            raise forms.ValidationError('Password must be at least 8 characters long.')
+        if not re.search(r'[A-Za-z]', password):
+            raise forms.ValidationError('Password must contain at least one letter.')
+        if not re.search(r'[0-9]', password):
+            raise forms.ValidationError('Password must contain at least one number.')
+        if password.lower() in ['password', '12345678', 'qwerty123']:
+            raise forms.ValidationError('Password is too common. Please choose a stronger password.')
+        return password
     
     def clean(self):
         cleaned_data = super().clean()
@@ -131,7 +154,7 @@ class PasswordResetConfirmForm(forms.Form):
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30, required=True)
-    last_name = forms.CharField(max_length=30, required=True)
+    last_name = forms.CharField(max_length=30, required=False)
 
     class Meta:
         model = User
@@ -141,7 +164,7 @@ class UserRegistrationForm(UserCreationForm):
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
         user.first_name = self.cleaned_data['first_name']
-        user.last_name = self.cleaned_data['last_name']
+        user.last_name = self.cleaned_data.get('last_name', '')
         if commit:
             user.save()
         return user
