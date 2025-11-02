@@ -292,7 +292,7 @@ class PasswordResetRequestView(View):
             if send_otp_email(email, otp.otp_code, 'password_reset'):
                 request.session['reset_email'] = email
                 messages.success(request, f'Password reset code sent to {email}')
-                return redirect('accounts:password_reset_confirm')
+                return redirect('accounts:password-reset-confirm')
             else:
                 messages.error(request, 'Failed to send reset email. Please try again.')
         
@@ -363,7 +363,7 @@ class ResendPasswordResetOTPView(View):
         else:
             messages.error(request, 'Failed to send reset email.')
         
-        return redirect('accounts:password_reset_confirm')
+        return redirect('accounts:password-reset-confirm')
 
 
 # AJAX endpoints for real-time validation
