@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db import transaction
 from django.utils import timezone
+from django.http import JsonResponse
 from .forms import (
     UserRegistrationForm, UserUpdateForm, UserProfileForm,
     RegistrationStepOneForm, OTPVerificationForm,
@@ -363,3 +364,26 @@ class ResendPasswordResetOTPView(View):
             messages.error(request, 'Failed to send reset email.')
         
         return redirect('accounts:password_reset_confirm')
+
+
+# AJAX endpoints for real-time validation
+def check_username_availability(request):
+    """Check if username is available"""
+    username = request.GET.get('username', '').strip()
+    
+    if not username:
+        return JsonResponse({'available': False, 'message': 'Username is required'})
+    
+    available = not User.objects.filter(username=username).exists()
+    return JsonResponse({'available': available})
+
+
+def check_email_availability(request):
+    """Check if email is available"""
+    email = request.GET.get('email', '').strip()
+    
+    if not email:
+        return JsonResponse({'available': False, 'message': 'Email is required'})
+    
+    available = not User.objects.filter(email=email).exists()
+    return JsonResponse({'available': available})

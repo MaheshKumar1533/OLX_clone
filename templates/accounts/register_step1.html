@@ -3,6 +3,62 @@
 
 {% block title %}Register - STUDYSWAP{% endblock %}
 
+{% block extra_css %}
+<style>
+    .validation-message {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    .validation-message.show {
+        display: block;
+    }
+    .validation-message.error {
+        color: #dc3545;
+    }
+    .validation-message.success {
+        color: #198754;
+    }
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+    .form-control.is-valid {
+        border-color: #198754;
+    }
+    .password-strength {
+        height: 5px;
+        border-radius: 3px;
+        margin-top: 5px;
+        transition: all 0.3s ease;
+    }
+    .password-strength.weak {
+        background: #dc3545;
+        width: 33%;
+    }
+    .password-strength.medium {
+        background: #ffc107;
+        width: 66%;
+    }
+    .password-strength.strong {
+        background: #198754;
+        width: 100%;
+    }
+    .validation-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: none;
+    }
+    .validation-icon.show {
+        display: block;
+    }
+    .input-wrapper {
+        position: relative;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -14,36 +70,73 @@
                         <p class="text-muted">Join STUDYSWAP - College Marketplace</p>
                     </div>
 
-                    <form method="post">
+                    <form method="post" id="registrationForm">
                         {% csrf_token %}
                         
                         <div class="mb-3">
-                            {{ form.username|as_crispy_field }}
+                            <label for="id_username" class="form-label">Username</label>
+                            <div class="input-wrapper">
+                                <input type="text" name="username" maxlength="150" 
+                                       class="form-control" placeholder="Choose a username" 
+                                       id="id_username" required>
+                                <i class="fas fa-check-circle text-success validation-icon" id="username-valid"></i>
+                                <i class="fas fa-times-circle text-danger validation-icon" id="username-invalid"></i>
+                            </div>
+                            <div id="username-feedback" class="validation-message"></div>
                         </div>
                         
                         <div class="mb-3">
-                            {{ form.email|as_crispy_field }}
+                            <label for="id_email" class="form-label">Email</label>
+                            <div class="input-wrapper">
+                                <input type="email" name="email" class="form-control" 
+                                       placeholder="your.email@example.com" id="id_email" required>
+                                <i class="fas fa-check-circle text-success validation-icon" id="email-valid"></i>
+                                <i class="fas fa-times-circle text-danger validation-icon" id="email-invalid"></i>
+                            </div>
+                            <div id="email-feedback" class="validation-message"></div>
                             <small class="form-text text-muted">We'll send a verification code to this email</small>
                         </div>
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                {{ form.first_name|as_crispy_field }}
+                                <label for="id_first_name" class="form-label">First name</label>
+                                <input type="text" name="first_name" maxlength="30" 
+                                       class="form-control" placeholder="First name" 
+                                       id="id_first_name" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                {{ form.last_name|as_crispy_field }}
+                                <label for="id_last_name" class="form-label">Last name <span class="text-muted">(optional)</span></label>
+                                <input type="text" name="last_name" maxlength="30" 
+                                       class="form-control" placeholder="Last name (optional)" 
+                                       id="id_last_name">
                             </div>
                         </div>
                         
                         <div class="mb-3">
-                            {{ form.password1|as_crispy_field }}
+                            <label for="id_password1" class="form-label">Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" name="password1" class="form-control" 
+                                       placeholder="Create a password" id="id_password1" required>
+                                <i class="fas fa-check-circle text-success validation-icon" id="password1-valid"></i>
+                                <i class="fas fa-times-circle text-danger validation-icon" id="password1-invalid"></i>
+                            </div>
+                            <div class="password-strength" id="password-strength"></div>
+                            <div id="password1-feedback" class="validation-message"></div>
+                            <small class="form-text text-muted">At least 8 characters with letters and numbers</small>
                         </div>
                         
                         <div class="mb-4">
-                            {{ form.password2|as_crispy_field }}
+                            <label for="id_password2" class="form-label">Confirm Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" name="password2" class="form-control" 
+                                       placeholder="Confirm password" id="id_password2" required>
+                                <i class="fas fa-check-circle text-success validation-icon" id="password2-valid"></i>
+                                <i class="fas fa-times-circle text-danger validation-icon" id="password2-invalid"></i>
+                            </div>
+                            <div id="password2-feedback" class="validation-message"></div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                        <button type="submit" class="btn btn-primary w-100 mb-3" id="submitBtn">
                             <i class="fas fa-arrow-right me-2"></i>Continue
                         </button>
                     </form>
@@ -58,4 +151,258 @@
         </div>
     </div>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const usernameInput = document.getElementById('id_username');
+    const emailInput = document.getElementById('id_email');
+    const password1Input = document.getElementById('id_password1');
+    const password2Input = document.getElementById('id_password2');
+    const form = document.getElementById('registrationForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    let validationState = {
+        username: false,
+        email: false,
+        password1: false,
+        password2: false
+    };
+
+    // Username validation
+    usernameInput.addEventListener('input', function() {
+        const username = this.value.trim();
+        const feedback = document.getElementById('username-feedback');
+        const validIcon = document.getElementById('username-valid');
+        const invalidIcon = document.getElementById('username-invalid');
+
+        if (username.length === 0) {
+            resetField(this, feedback, validIcon, invalidIcon);
+            validationState.username = false;
+            return;
+        }
+
+        if (username.length < 3) {
+            showError(this, feedback, 'Username must be at least 3 characters long', validIcon, invalidIcon);
+            validationState.username = false;
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            showError(this, feedback, 'Username can only contain letters, numbers, and underscores', validIcon, invalidIcon);
+            validationState.username = false;
+            return;
+        }
+
+        // Check if username exists (AJAX)
+        checkUsernameAvailability(username, this, feedback, validIcon, invalidIcon);
+    });
+
+    // Email validation
+    emailInput.addEventListener('input', function() {
+        const email = this.value.trim();
+        const feedback = document.getElementById('email-feedback');
+        const validIcon = document.getElementById('email-valid');
+        const invalidIcon = document.getElementById('email-invalid');
+
+        if (email.length === 0) {
+            resetField(this, feedback, validIcon, invalidIcon);
+            validationState.email = false;
+            return;
+        }
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            showError(this, feedback, 'Please enter a valid email address', validIcon, invalidIcon);
+            validationState.email = false;
+            return;
+        }
+
+        // Check if email exists (AJAX)
+        checkEmailAvailability(email, this, feedback, validIcon, invalidIcon);
+    });
+
+    // Password validation
+    password1Input.addEventListener('input', function() {
+        const password = this.value;
+        const feedback = document.getElementById('password1-feedback');
+        const validIcon = document.getElementById('password1-valid');
+        const invalidIcon = document.getElementById('password1-invalid');
+        const strengthBar = document.getElementById('password-strength');
+
+        if (password.length === 0) {
+            resetField(this, feedback, validIcon, invalidIcon);
+            strengthBar.className = 'password-strength';
+            validationState.password1 = false;
+            return;
+        }
+
+        let errors = [];
+        let strength = 0;
+
+        if (password.length < 8) {
+            errors.push('at least 8 characters');
+        } else {
+            strength++;
+        }
+
+        if (!/[A-Za-z]/.test(password)) {
+            errors.push('at least one letter');
+        } else {
+            strength++;
+        }
+
+        if (!/[0-9]/.test(password)) {
+            errors.push('at least one number');
+        } else {
+            strength++;
+        }
+
+        const commonPasswords = ['password', '12345678', 'qwerty123'];
+        if (commonPasswords.includes(password.toLowerCase())) {
+            errors.push('not a common password');
+            strength = 0;
+        }
+
+        // Update strength bar
+        if (strength === 1) {
+            strengthBar.className = 'password-strength weak';
+        } else if (strength === 2) {
+            strengthBar.className = 'password-strength medium';
+        } else if (strength === 3) {
+            strengthBar.className = 'password-strength strong';
+        } else {
+            strengthBar.className = 'password-strength';
+        }
+
+        if (errors.length > 0) {
+            showError(this, feedback, 'Password must have: ' + errors.join(', '), validIcon, invalidIcon);
+            validationState.password1 = false;
+        } else {
+            showSuccess(this, feedback, 'Strong password!', validIcon, invalidIcon);
+            validationState.password1 = true;
+        }
+
+        // Revalidate password2 if it has a value
+        if (password2Input.value) {
+            password2Input.dispatchEvent(new Event('input'));
+        }
+    });
+
+    // Confirm password validation
+    password2Input.addEventListener('input', function() {
+        const password2 = this.value;
+        const password1 = password1Input.value;
+        const feedback = document.getElementById('password2-feedback');
+        const validIcon = document.getElementById('password2-valid');
+        const invalidIcon = document.getElementById('password2-invalid');
+
+        if (password2.length === 0) {
+            resetField(this, feedback, validIcon, invalidIcon);
+            validationState.password2 = false;
+            return;
+        }
+
+        if (password1 !== password2) {
+            showError(this, feedback, 'Passwords do not match', validIcon, invalidIcon);
+            validationState.password2 = false;
+        } else {
+            showSuccess(this, feedback, 'Passwords match!', validIcon, invalidIcon);
+            validationState.password2 = true;
+        }
+    });
+
+    // Helper functions
+    function showError(input, feedback, message, validIcon, invalidIcon) {
+        input.classList.remove('is-valid');
+        input.classList.add('is-invalid');
+        feedback.className = 'validation-message error show';
+        feedback.textContent = message;
+        validIcon.classList.remove('show');
+        invalidIcon.classList.add('show');
+    }
+
+    function showSuccess(input, feedback, message, validIcon, invalidIcon) {
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        feedback.className = 'validation-message success show';
+        feedback.textContent = message;
+        invalidIcon.classList.remove('show');
+        validIcon.classList.add('show');
+    }
+
+    function resetField(input, feedback, validIcon, invalidIcon) {
+        input.classList.remove('is-valid', 'is-invalid');
+        feedback.className = 'validation-message';
+        feedback.textContent = '';
+        validIcon.classList.remove('show');
+        invalidIcon.classList.remove('show');
+    }
+
+    // AJAX check for username availability
+    let usernameTimeout;
+    function checkUsernameAvailability(username, input, feedback, validIcon, invalidIcon) {
+        clearTimeout(usernameTimeout);
+        usernameTimeout = setTimeout(() => {
+            fetch(`/accounts/check-username/?username=${encodeURIComponent(username)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.available) {
+                        showSuccess(input, feedback, 'Username is available', validIcon, invalidIcon);
+                        validationState.username = true;
+                    } else {
+                        showError(input, feedback, 'Username already exists', validIcon, invalidIcon);
+                        validationState.username = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking username:', error);
+                    validationState.username = true; // Allow submission if check fails
+                });
+        }, 500);
+    }
+
+    // AJAX check for email availability
+    let emailTimeout;
+    function checkEmailAvailability(email, input, feedback, validIcon, invalidIcon) {
+        clearTimeout(emailTimeout);
+        emailTimeout = setTimeout(() => {
+            fetch(`/accounts/check-email/?email=${encodeURIComponent(email)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.available) {
+                        showSuccess(input, feedback, 'Email is available', validIcon, invalidIcon);
+                        validationState.email = true;
+                    } else {
+                        showError(input, feedback, 'Email already registered', validIcon, invalidIcon);
+                        validationState.email = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking email:', error);
+                    validationState.email = true; // Allow submission if check fails
+                });
+        }, 500);
+    }
+
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        const allValid = Object.values(validationState).every(v => v === true);
+        
+        if (!allValid) {
+            e.preventDefault();
+            
+            // Trigger validation on all fields
+            usernameInput.dispatchEvent(new Event('input'));
+            emailInput.dispatchEvent(new Event('input'));
+            password1Input.dispatchEvent(new Event('input'));
+            password2Input.dispatchEvent(new Event('input'));
+            
+            alert('Please fix all validation errors before submitting.');
+        }
+    });
+});
+</script>
 {% endblock %}

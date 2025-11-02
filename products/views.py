@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView, View
 )
 from django.contrib import messages
 from django.urls import reverse_lazy, reverse
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils.decorators import method_decorator
@@ -23,7 +24,12 @@ class LandingPageView(TemplateView):
             status='active', is_featured=True
         ).order_by('-created_at')[:6]
         context['categories'] = Category.objects.filter(is_active=True, parent=None)[:6]
+        
+        # Calculate real statistics
         context['total_products'] = Product.objects.filter(status='active').count()
+        context['total_users'] = User.objects.filter(is_active=True).count()
+        context['successful_deals'] = Product.objects.filter(status='sold').count()
+        
         return context
 
 class ShopView(ListView):

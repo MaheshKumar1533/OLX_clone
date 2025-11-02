@@ -42,4 +42,8 @@ urlpatterns = [
     path('profile/<str:username>/', views.PublicProfileView.as_view(), name='public_profile'),
     path('my-products/', views.MyProductsView.as_view(), name='my_products'),
     path('my-wishlist/', views.MyWishlistView.as_view(), name='my_wishlist'),
+    
+    # AJAX validation endpoints
+    path('check-username/', views.check_username_availability, name='check_username'),
+    path('check-email/', views.check_email_availability, name='check_email'),
 ]
