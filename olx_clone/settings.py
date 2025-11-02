@@ -163,6 +163,11 @@ LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'products:shop'
 LOGOUT_REDIRECT_URL = 'products:landing'
 
+# Session Settings
+SESSION_COOKIE_AGE = 604800  # 7 days in seconds (7 * 24 * 60 * 60)
+SESSION_SAVE_EVERY_REQUEST = True  # Update session expiry on every request
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Session persists after browser closes
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -205,3 +210,8 @@ DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER', 'noreply@studiswap.in')
 # OTP Configuration
 OTP_EXPIRY_MINUTES = 10  # OTP valid for 10 minutes
 OTP_LENGTH = 6  # 6-digit OTP
+
+# Session Configuration
+SESSION_COOKIE_AGE = 604800  # 7 days in seconds (7 * 24 * 60 * 60)
+SESSION_SAVE_EVERY_REQUEST = True  # Extend session on each request
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep session even after closing browser

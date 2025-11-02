@@ -115,8 +115,13 @@
                         <div class="mb-3">
                             <label for="id_password1" class="form-label">Password</label>
                             <div class="input-wrapper">
-                                <input type="password" name="password1" class="form-control" 
-                                       placeholder="Create a password" id="id_password1" required>
+                                <div class="input-group">
+                                    <input type="password" name="password1" class="form-control" 
+                                           placeholder="Create a password" id="id_password1" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordField('id_password1', this)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                                 <i class="fas fa-check-circle text-success validation-icon" id="password1-valid"></i>
                                 <i class="fas fa-times-circle text-danger validation-icon" id="password1-invalid"></i>
                             </div>
@@ -128,8 +133,13 @@
                         <div class="mb-4">
                             <label for="id_password2" class="form-label">Confirm Password</label>
                             <div class="input-wrapper">
-                                <input type="password" name="password2" class="form-control" 
-                                       placeholder="Confirm password" id="id_password2" required>
+                                <div class="input-group">
+                                    <input type="password" name="password2" class="form-control" 
+                                           placeholder="Confirm password" id="id_password2" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordField('id_password2', this)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                                 <i class="fas fa-check-circle text-success validation-icon" id="password2-valid"></i>
                                 <i class="fas fa-times-circle text-danger validation-icon" id="password2-invalid"></i>
                             </div>
