@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-a!%9z1!tcdo)#f%z6%wjlr3gl0xm=8v7g6^zbta@lnd&=b#3_k')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True if os.environ.get('DEBUG', 'True') == 'True' else False
 
 ALLOWED_HOSTS = ["swapnest.pythonanywhere.com", "studiswap.in", "www.studiswap.in", "127.0.0.1", "localhost"]
 

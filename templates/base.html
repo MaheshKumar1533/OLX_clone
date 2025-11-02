@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -245,6 +245,16 @@
                     loadingScreen.style.display = 'none';
                 }, 500);
             }, 500);
+        });
+        
+        // Handle back/forward navigation (pageshow event)
+        window.addEventListener('pageshow', function(event) {
+            const loadingScreen = document.getElementById('loading-screen');
+            // If page is loaded from cache (back/forward), hide loading screen immediately
+            if (event.persisted || performance.getEntriesByType('navigation')[0].type === 'back_forward') {
+                loadingScreen.style.display = 'none';
+                loadingScreen.classList.add('fade-out');
+            }
         });
         
         // Show loading screen on page navigation

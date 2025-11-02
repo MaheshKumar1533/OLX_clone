@@ -25,9 +25,9 @@ def find_url_references(root_dir, old_url, search_pattern):
     
     return matches
 
-# Search for 'products:home' references
+# Search for 'products:landing' references
 root = r'd:\Projects\OLX_clone'
-old_url = "products:home"
+old_url = "products:landing"
 
 print(f"Searching for '{old_url}' in {root}...\n")
 results = find_url_references(root, old_url, old_url)

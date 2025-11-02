@@ -14,7 +14,7 @@ body {
 }
 
 nav{
-  z-index: 1;
+  z-index: 100000;
 }
 
 @keyframes gradientFlow {
