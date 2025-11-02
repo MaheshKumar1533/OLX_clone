@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'categories',
     'chat',
     'notifications',
+    'support',
 ]
 
 MIDDLEWARE = [

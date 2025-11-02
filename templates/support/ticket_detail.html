@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ticket #{{ ticket.id }} - STUDISWAP{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Back Button -->
+            <a href="{% url 'support:my_tickets' %}" class="btn btn-outline-secondary mb-4">
+                <i class="fas fa-arrow-left me-2"></i>Back to My Tickets
+            </a>
+
+            <!-- Ticket Details Card -->
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-ticket-alt me-2"></i>
+                        Ticket #{{ ticket.id }}
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">{{ ticket.subject }}</h5>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            {% if ticket.status == 'open' %}
+                                <span class="badge bg-primary">Open</span>
+                            {% elif ticket.status == 'in_progress' %}
+                                <span class="badge bg-warning">In Progress</span>
+                            {% elif ticket.status == 'resolved' %}
+                                <span class="badge bg-success">Resolved</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Closed</span>
+                            {% endif %}
+                            
+                            {% if ticket.priority == 'urgent' %}
+                                <span class="badge bg-danger ms-1">Urgent</span>
+                            {% elif ticket.priority == 'high' %}
+                                <span class="badge bg-warning ms-1">High Priority</span>
+                            {% elif ticket.priority == 'medium' %}
+                                <span class="badge bg-info ms-1">Medium Priority</span>
+                            {% else %}
+                                <span class="badge bg-secondary ms-1">Low Priority</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row text-muted mb-3">
+                        <div class="col-md-6">
+                            <small><i class="fas fa-user me-1"></i>{{ ticket.name }}</small>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <small><i class="fas fa-clock me-1"></i>{{ ticket.created_at|date:"M d, Y h:i A" }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Category:</strong> 
+                        <span class="badge bg-light text-dark">{{ ticket.get_category_display }}</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Description:</h6>
+                        <p class="mb-0" style="white-space: pre-wrap;">{{ ticket.description }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Replies Section -->
+            {% if replies %}
+                <div class="card border-0 shadow mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>
+                            Replies ({{ replies.count }})
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% for reply in replies %}
+                            <div class="mb-3 {% if reply.is_admin_reply %}border-start border-primary border-4 ps-3{% endif %}">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <strong>
+                                            {% if reply.is_admin_reply %}
+                                                <i class="fas fa-shield-alt text-primary me-1"></i>Support Team
+                                            {% else %}
+                                                <i class="fas fa-user me-1"></i>{{ reply.user.username }}
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>{{ reply.created_at|timesince }} ago
+                                    </small>
+                                </div>
+                                <p class="mb-0" style="white-space: pre-wrap;">{{ reply.message }}</p>
+                            </div>
+                            {% if not forloop.last %}
+                                <hr>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Add Reply Form -->
+            {% if not ticket.is_resolved %}
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-reply me-2"></i>
+                            Add Reply
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ reply_form.message }}
+                                {% if reply_form.message.errors %}
+                                    <div class="text-danger small">{{ reply_form.message.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Send Reply
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    This ticket has been resolved. If you need further assistance, please create a new ticket.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

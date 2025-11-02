@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Support Tickets - STUDISWAP{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-clipboard-list text-primary me-2"></i>
+            My Support Tickets
+        </h2>
+        <a href="{% url 'support:create_ticket' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Ticket
+        </a>
+    </div>
+
+    <!-- Tickets List -->
+    {% if tickets %}
+        <div class="row">
+            {% for ticket in tickets %}
+                <div class="col-12 mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-2">
+                                        <a href="{% url 'support:ticket_detail' ticket.pk %}" class="text-decoration-none text-dark">
+                                            #{{ ticket.id }} - {{ ticket.subject }}
+                                        </a>
+                                    </h5>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-tag me-1"></i>{{ ticket.get_category_display }}
+                                        <span class="ms-3"><i class="fas fa-clock me-1"></i>{{ ticket.created_at|timesince }} ago</span>
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    {% if ticket.status == 'open' %}
+                                        <span class="badge bg-primary">Open</span>
+                                    {% elif ticket.status == 'in_progress' %}
+                                        <span class="badge bg-warning">In Progress</span>
+                                    {% elif ticket.status == 'resolved' %}
+                                        <span class="badge bg-success">Resolved</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Closed</span>
+                                    {% endif %}
+                                    
+                                    {% if ticket.priority == 'urgent' %}
+                                        <span class="badge bg-danger ms-1">Urgent</span>
+                                    {% elif ticket.priority == 'high' %}
+                                        <span class="badge bg-warning ms-1">High</span>
+                                    {% endif %}
+                                    
+                                    <div class="mt-2">
+                                        <a href="{% url 'support:ticket_detail' ticket.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>View
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+            <div class="d-flex justify-content-center mt-4">
+                <nav>
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-5">
+                <i class="fas fa-ticket-alt text-muted" style="font-size: 5rem;"></i>
+                <h4 class="mt-4 mb-3">No Support Tickets Yet</h4>
+                <p class="text-muted mb-4">You haven't created any support tickets. Need help with something?</p>
+                <a href="{% url 'support:create_ticket' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create Your First Ticket
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Back Button -->
+    <div class="mt-4">
+        <a href="{% url 'support:help_center' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Help Center
+        </a>
+    </div>
+</div>
+{% endblock %}

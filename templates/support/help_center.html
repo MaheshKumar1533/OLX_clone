@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Help Center - STUDISWAP{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 mb-3">
+            <i class="fas fa-life-ring text-primary me-3"></i>Help Center
+        </h1>
+        <p class="lead text-muted">How can we help you today?</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-5">
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-headset text-primary mb-3" style="font-size: 3rem;"></i>
+                    <h4>Contact Support</h4>
+                    <p class="text-muted">Having an issue? Create a support ticket and our team will help you.</p>
+                    <a href="{% url 'support:create_ticket' %}" class="btn btn-primary">
+                        <i class="fas fa-ticket-alt me-2"></i>Create Ticket
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-clipboard-list text-success mb-3" style="font-size: 3rem;"></i>
+                    <h4>My Tickets</h4>
+                    <p class="text-muted">View and track your support tickets and their status.</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'support:my_tickets' %}" class="btn btn-success">
+                            <i class="fas fa-list me-2"></i>View My Tickets
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}?next={% url 'support:my_tickets' %}" class="btn btn-success">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to View Tickets
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQs Section -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-question-circle text-info me-2"></i>
+                Frequently Asked Questions
+            </h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="accordion" id="faqAccordion">
+                {% for faq in faqs %}
+                <div class="accordion-item border-0 shadow-sm mb-3">
+                    <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" 
+                                aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" 
+                                aria-controls="collapse{{ forloop.counter }}">
+                            <i class="fas fa-question-circle text-primary me-2"></i>
+                            {{ faq.question }}
+                        </button>
+                    </h2>
+                    <div id="collapse{{ forloop.counter }}" 
+                         class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                         aria-labelledby="heading{{ forloop.counter }}" 
+                         data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            {{ faq.answer }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Help -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body text-center p-5">
+                    <h4 class="mb-3">Still need help?</h4>
+                    <p class="text-muted mb-4">Can't find what you're looking for? Our support team is here to help!</p>
+                    <a href="{% url 'support:create_ticket' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane me-2"></i>Submit a Support Request
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

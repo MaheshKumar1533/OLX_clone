@@ -25,6 +25,7 @@ urlpatterns = [
     path('categories/', include('categories.urls')),
     path('chat/', include('chat.urls')),
     path('notifications/', include('notifications.urls')),
+    path('support/', include('support.urls')),
     path('', include('products.urls')),
 ]
 

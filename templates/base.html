@@ -105,6 +105,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'products:shop' %}">Shop</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'support:help_center' %}">
+                            <i class="fas fa-life-ring me-1"></i>Help
+                        </a>
+                    </li>
                     {% if user.is_authenticated %}
                         <!-- Chat Link -->
                         <li class="nav-item">
@@ -137,6 +142,9 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'chat:conversation_list' %}">My Chats</a></li>
                                 <li><a class="dropdown-item" href="{% url 'notifications:preferences' %}">Notification Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'support:my_tickets' %}"><i class="fas fa-ticket-alt me-1"></i>My Support Tickets</a></li>
+                                <li><a class="dropdown-item" href="{% url 'support:help_center' %}"><i class="fas fa-life-ring me-1"></i>Help Center</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Logout</a></li>
                             </ul>
@@ -195,6 +203,7 @@
                         <li><a href="{% url 'products:shop' %}" class="text-light">Shop</a></li>
                         <li><a href="{% url 'categories:category_list' %}" class="text-light">Categories</a></li>
                         <li><a href="{% url 'products:search' %}" class="text-light">Search</a></li>
+                        <li><a href="{% url 'support:help_center' %}" class="text-light">Help & Support</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
