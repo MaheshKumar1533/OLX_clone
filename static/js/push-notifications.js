@@ -211,12 +211,30 @@ class PushNotificationManager {
 // Create global instance
 window.pushNotificationManager = new PushNotificationManager();
 
-// Auto-initialize on page load for authenticated users
+// Auto-initialize and prompt for notifications on login
 document.addEventListener('DOMContentLoaded', async function () {
-    // Check if user is authenticated (you can customize this check)
+    // Check if user is authenticated
     const isAuthenticated = document.querySelector('meta[name="user-authenticated"]')?.content === 'true';
 
     if (isAuthenticated) {
         await window.pushNotificationManager.init();
+
+        // Check if we should prompt for notifications
+        const permission = window.pushNotificationManager.getPermissionStatus();
+        const isSubscribed = await window.pushNotificationManager.isSubscribed();
+
+        // Only prompt if permission hasn't been asked yet and not already subscribed
+        if (permission === 'default' && !isSubscribed) {
+            // Small delay to not overwhelm user immediately on page load
+            setTimeout(async () => {
+                try {
+                    await window.pushNotificationManager.subscribe();
+                    console.log('Successfully subscribed to push notifications');
+                } catch (error) {
+                    // User denied or error occurred - fail silently
+                    console.log('Push notification subscription skipped:', error.message);
+                }
+            }, 2000); // Wait 2 seconds after page load
+        }
     }
 });
