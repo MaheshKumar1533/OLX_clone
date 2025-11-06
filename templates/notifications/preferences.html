@@ -38,6 +38,28 @@
                             
                             <div class="col-12 mb-4">
                                 <h5 class="text-primary mb-3">
+                                    <i class="fas fa-mobile-alt me-2"></i>Push Notifications
+                                </h5>
+                                <div class="form-check form-switch mb-3">
+                                    {{ form.push_notifications }}
+                                    <label class="form-check-label" for="{{ form.push_notifications.id_for_label }}">
+                                        <strong>{{ form.push_notifications.label }}</strong>
+                                        <br><small class="text-muted">{{ form.push_notifications.help_text }}</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="alert alert-info" id="pushNotificationStatus">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <span id="pushStatusText">Loading push notification status...</span>
+                                </div>
+                                
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="enablePushBtn" style="display: none;">
+                                    <i class="fas fa-bell me-2"></i>Enable Browser Push Notifications
+                                </button>
+                            </div>
+                            
+                            <div class="col-12 mb-4">
+                                <h5 class="text-primary mb-3">
                                     <i class="fas fa-bell me-2"></i>App Notifications
                                 </h5>
                                 
@@ -115,10 +137,61 @@
                         <li><strong>Price Updates:</strong> When sellers update prices on products you're interested in</li>
                         <li><strong>Wishlist Updates:</strong> When products in your wishlist have price changes or updates</li>
                         <li><strong>Marketing:</strong> Special offers, new features, and college marketplace news</li>
+                        <li><strong>Push Notifications:</strong> Instant notifications on your device, even when the browser is closed</li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Push notification status check and enable button
+    document.addEventListener('DOMContentLoaded', async function() {
+        const statusDiv = document.getElementById('pushNotificationStatus');
+        const statusText = document.getElementById('pushStatusText');
+        const enableBtn = document.getElementById('enablePushBtn');
+        
+        if (window.pushNotificationManager) {
+            const permission = window.pushNotificationManager.getPermissionStatus();
+            const isSubscribed = await window.pushNotificationManager.isSubscribed();
+            
+            if (permission === 'granted' && isSubscribed) {
+                statusText.textContent = '✓ Push notifications are enabled for this device';
+                statusDiv.className = 'alert alert-success';
+            } else if (permission === 'denied') {
+                statusText.textContent = '✗ Push notifications are blocked. Please enable them in your browser settings.';
+                statusDiv.className = 'alert alert-warning';
+            } else if (permission === 'unsupported') {
+                statusText.textContent = '✗ Your browser does not support push notifications.';
+                statusDiv.className = 'alert alert-secondary';
+            } else {
+                statusText.textContent = 'Click the button below to enable push notifications for instant updates';
+                statusDiv.className = 'alert alert-info';
+                enableBtn.style.display = 'inline-block';
+            }
+        }
+        
+        // Enable push notifications
+        enableBtn.addEventListener('click', async function() {
+            try {
+                enableBtn.disabled = true;
+                enableBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enabling...';
+                
+                await window.pushNotificationManager.subscribe();
+                
+                statusText.textContent = '✓ Push notifications enabled successfully!';
+                statusDiv.className = 'alert alert-success';
+                enableBtn.style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error enabling push notifications:', error);
+                statusText.textContent = '✗ Failed to enable push notifications: ' + error.message;
+                statusDiv.className = 'alert alert-danger';
+                enableBtn.disabled = false;
+                enableBtn.innerHTML = '<i class="fas fa-bell me-2"></i>Enable Browser Push Notifications';
+            }
+        });
+    });
+</script>
 {% endblock %}

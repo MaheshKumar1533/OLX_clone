@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if user.is_authenticated %}
+    <meta name="user-authenticated" content="true">
+    {% endif %}
     <title>{% block title %}STUDISWAP - College Student Marketplace{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
@@ -384,6 +387,9 @@
         // Update every 30 seconds
         setInterval(updateNotificationCount, 30000);
     </script>
+    
+    <!-- Push Notifications Script -->
+    <script src="{% static 'js/push-notifications.js' %}"></script>
     {% endif %}
     
     <!-- Password Toggle Script -->

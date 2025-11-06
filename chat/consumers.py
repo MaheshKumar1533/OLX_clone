@@ -4,6 +4,7 @@ from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from .models import Conversation, Message
 from notifications.models import Notification
+from notifications.push_utils import send_message_notification
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -138,6 +139,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 if not prefs.new_message_notifications:
                     return
             
+            # Create in-app notification
             Notification.create_notification(
                 recipient=recipient,
                 sender=self.user,
@@ -147,5 +149,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 content_object=message,
                 action_url=f'/chat/conversation/{conversation.id}/'
             )
+            
+            # Send push notification
+            send_message_notification(
+                sender=self.user,
+                recipient=recipient,
+                conversation=conversation,
+                message_text=message.content
+            )
+            
         except Exception as e:
             print(f"Error creating notification: {e}")

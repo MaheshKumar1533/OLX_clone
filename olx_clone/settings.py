@@ -213,5 +213,11 @@ OTP_LENGTH = 6  # 6-digit OTP
 
 # Session Configuration
 SESSION_COOKIE_AGE = 604800  # 7 days in seconds (7 * 24 * 60 * 60)
+
+# Web Push Notification Configuration
+# Generate VAPID keys using: python manage.py generate_vapid_keys
+VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY', '')
+VAPID_PUBLIC_KEY = os.environ.get('VAPID_PUBLIC_KEY', '')
+VAPID_ADMIN_EMAIL = os.environ.get('VAPID_ADMIN_EMAIL', 'mailto:studiswap@gmail.com')
 SESSION_SAVE_EVERY_REQUEST = True  # Extend session on each request
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep session even after closing browser

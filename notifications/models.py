@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+import json
 
 
 class Notification(models.Model):
@@ -67,6 +68,31 @@ class NotificationPreference(models.Model):
     price_update_notifications = models.BooleanField(default=True)
     wishlist_notifications = models.BooleanField(default=True)
     marketing_notifications = models.BooleanField(default=False)
+    push_notifications = models.BooleanField(default=True)
     
     def __str__(self):
         return f"Notification preferences for {self.user.username}"
+
+
+class WebPushDevice(models.Model):
+    """Model to store Web Push subscription information for each user device"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_devices')
+    subscription_info = models.TextField(help_text='Push subscription JSON')
+    browser = models.CharField(max_length=100, blank=True, null=True)
+    device_name = models.CharField(max_length=200, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        unique_together = ('user', 'subscription_info')
+    
+    def __str__(self):
+        return f"Push device for {self.user.username}"
+    
+    def get_subscription_info(self):
+        """Parse and return subscription info as dict"""
+        try:
+            return json.loads(self.subscription_info)
+        except:
+            return None

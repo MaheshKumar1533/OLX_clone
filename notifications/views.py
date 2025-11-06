@@ -6,8 +6,12 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.urls import reverse_lazy
-from .models import Notification, NotificationPreference
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from .models import Notification, NotificationPreference, WebPushDevice
 from .forms import NotificationPreferenceForm
+import json
 
 
 class NotificationListView(LoginRequiredMixin, ListView):
@@ -132,3 +136,77 @@ def get_unread_count(request):
     ).count()
     
     return JsonResponse({'unread_count': count})
+
+
+@login_required
+def get_vapid_public_key(request):
+    """Return the VAPID public key for push notification subscription"""
+    return JsonResponse({
+        'public_key': settings.VAPID_PUBLIC_KEY
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def subscribe_push(request):
+    """Subscribe a device to push notifications"""
+    try:
+        data = json.loads(request.body)
+        subscription_info = data.get('subscription')
+        browser = data.get('browser', '')
+        device_name = data.get('device_name', '')
+        
+        if not subscription_info:
+            return JsonResponse({'error': 'No subscription data provided'}, status=400)
+        
+        # Convert subscription to JSON string
+        subscription_json = json.dumps(subscription_info)
+        
+        # Create or update the device subscription
+        device, created = WebPushDevice.objects.update_or_create(
+            user=request.user,
+            subscription_info=subscription_json,
+            defaults={
+                'browser': browser,
+                'device_name': device_name,
+                'is_active': True
+            }
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Successfully subscribed to push notifications',
+            'device_id': device.id
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def unsubscribe_push(request):
+    """Unsubscribe a device from push notifications"""
+    try:
+        data = json.loads(request.body)
+        subscription_info = data.get('subscription')
+        
+        if not subscription_info:
+            return JsonResponse({'error': 'No subscription data provided'}, status=400)
+        
+        subscription_json = json.dumps(subscription_info)
+        
+        # Deactivate or delete the device subscription
+        deleted_count = WebPushDevice.objects.filter(
+            user=request.user,
+            subscription_info=subscription_json
+        ).update(is_active=False)
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Successfully unsubscribed from push notifications'
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+

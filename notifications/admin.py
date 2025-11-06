@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Notification, NotificationPreference
+from .models import Notification, NotificationPreference, WebPushDevice
 
 
 @admin.register(Notification)
@@ -24,11 +24,32 @@ class NotificationAdmin(admin.ModelAdmin):
 @admin.register(NotificationPreference)
 class NotificationPreferenceAdmin(admin.ModelAdmin):
     list_display = [
-        'user', 'email_notifications', 'new_message_notifications', 
-        'product_inquiry_notifications', 'price_update_notifications'
+        'user', 'email_notifications', 'push_notifications', 
+        'new_message_notifications', 'product_inquiry_notifications', 
+        'price_update_notifications'
     ]
     list_filter = [
-        'email_notifications', 'new_message_notifications', 
-        'product_inquiry_notifications', 'price_update_notifications'
+        'email_notifications', 'push_notifications',
+        'new_message_notifications', 'product_inquiry_notifications', 
+        'price_update_notifications'
     ]
     search_fields = ['user__username']
+
+
+@admin.register(WebPushDevice)
+class WebPushDeviceAdmin(admin.ModelAdmin):
+    list_display = ['user', 'browser', 'device_name', 'is_active', 'created_at']
+    list_filter = ['is_active', 'browser', 'created_at']
+    search_fields = ['user__username', 'device_name', 'browser']
+    readonly_fields = ('created_at', 'updated_at', 'subscription_info')
+    actions = ['activate_devices', 'deactivate_devices']
+    
+    def activate_devices(self, request, queryset):
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f'{updated} devices activated.')
+    activate_devices.short_description = "Activate selected devices"
+    
+    def deactivate_devices(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f'{updated} devices deactivated.')
+    deactivate_devices.short_description = "Deactivate selected devices"
