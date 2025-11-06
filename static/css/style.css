@@ -65,7 +65,6 @@ nav{
 
 .nav-link {
   position: relative;
-  overflow: hidden;
 }
 
 .nav-link::after {
