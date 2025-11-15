@@ -235,3 +235,71 @@ class RemoveFromWishlistView(LoginRequiredMixin, View):
             messages.error(request, 'Product not found in your wishlist!')
         
         return redirect('products:product_detail', slug=product.slug)
+
+class MarkAsSoldView(LoginRequiredMixin, View):
+    def post(self, request, slug):
+        product = get_object_or_404(Product, slug=slug, seller=request.user)
+        
+        if product.status == 'sold':
+            messages.info(request, f'{product.title} is already marked as sold!')
+        else:
+            product.status = 'sold'
+            product.save(update_fields=['status'])
+            messages.success(request, f'{product.title} has been marked as sold!')
+        
+        # Redirect back to the page they came from
+        next_url = request.POST.get('next', request.META.get('HTTP_REFERER'))
+        if next_url:
+            return redirect(next_url)
+        return redirect('accounts:my_products')
+
+class MarkAsActiveView(LoginRequiredMixin, View):
+    def post(self, request, slug):
+        product = get_object_or_404(Product, slug=slug, seller=request.user)
+        
+        if product.status == 'active':
+            messages.info(request, f'{product.title} is already active!')
+        else:
+            product.status = 'active'
+            product.save(update_fields=['status'])
+            messages.success(request, f'{product.title} has been marked as active!')
+        
+        # Redirect back to the page they came from
+        next_url = request.POST.get('next', request.META.get('HTTP_REFERER'))
+        if next_url:
+            return redirect(next_url)
+        return redirect('accounts:my_products')
+
+class MarkAsSoldView(LoginRequiredMixin, View):
+    def post(self, request, slug):
+        product = get_object_or_404(Product, slug=slug, seller=request.user)
+        
+        if product.status == 'sold':
+            messages.info(request, f'{product.title} is already marked as sold!')
+        else:
+            product.status = 'sold'
+            product.save(update_fields=['status'])
+            messages.success(request, f'{product.title} has been marked as sold!')
+        
+        # Redirect back to the page they came from
+        next_url = request.POST.get('next', request.META.get('HTTP_REFERER'))
+        if next_url:
+            return redirect(next_url)
+        return redirect('accounts:my_products')
+
+class MarkAsActiveView(LoginRequiredMixin, View):
+    def post(self, request, slug):
+        product = get_object_or_404(Product, slug=slug, seller=request.user)
+        
+        if product.status == 'active':
+            messages.info(request, f'{product.title} is already active!')
+        else:
+            product.status = 'active'
+            product.save(update_fields=['status'])
+            messages.success(request, f'{product.title} has been marked as active!')
+        
+        # Redirect back to the page they came from
+        next_url = request.POST.get('next', request.META.get('HTTP_REFERER'))
+        if next_url:
+            return redirect(next_url)
+        return redirect('accounts:my_products')

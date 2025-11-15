@@ -86,25 +86,59 @@
           <div class="d-grid gap-2 mb-4">
             {% if user.is_authenticated %}
               {% if user != product.seller %}
-                <!-- Chat Button -->
-                <a href="{% url 'chat:start_conversation' product.id %}" class="btn btn-success btn-lg"><i class="fas fa-comment-dots me-2"></i>Chat with Seller</a>
-
-                {% if in_wishlist %}
-                  <form method="post" action="{% url 'products:remove_from_wishlist' product.id %}">
-                    {% csrf_token %}
-                    <button class="btn btn-outline-danger"><i class="fas fa-heart me-2"></i>Remove from Wishlist</button>
-                  </form>
+                <!-- Show if product is sold -->
+                {% if product.status == 'sold' %}
+                  <div class="alert alert-danger text-center">
+                    <i class="fas fa-times-circle me-2"></i>This item has been sold
+                  </div>
                 {% else %}
-                  <form method="post" action="{% url 'products:add_to_wishlist' product.id %}">
-                    {% csrf_token %}
-                    <button class="btn btn-outline-primary"><i class="far fa-heart me-2"></i>Add to Wishlist</button>
-                  </form>
+                  <!-- Chat Button -->
+                  <a href="{% url 'chat:start_conversation' product.id %}" class="btn btn-success btn-lg"><i class="fas fa-comment-dots me-2"></i>Chat with Seller</a>
+
+                  {% if in_wishlist %}
+                    <form method="post" action="{% url 'products:remove_from_wishlist' product.id %}">
+                      {% csrf_token %}
+                      <button class="btn btn-outline-danger"><i class="fas fa-heart me-2"></i>Remove from Wishlist</button>
+                    </form>
+                  {% else %}
+                    <form method="post" action="{% url 'products:add_to_wishlist' product.id %}">
+                      {% csrf_token %}
+                      <button class="btn btn-outline-primary"><i class="far fa-heart me-2"></i>Add to Wishlist</button>
+                    </form>
+                  {% endif %}
                 {% endif %}
               {% else %}
+                <!-- Seller's own product - show status and action buttons -->
+                {% if product.status == 'sold' %}
+                  <div class="alert alert-info text-center">
+                    <i class="fas fa-check-circle me-2"></i>Marked as Sold
+                  </div>
+                  <form method="post" action="{% url 'products:mark_as_active' product.slug %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button type="submit" class="btn btn-success">
+                      <i class="fas fa-redo me-2"></i>Mark as Available Again
+                    </button>
+                  </form>
+                {% else %}
+                  <form method="post" action="{% url 'products:mark_as_sold' product.slug %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button type="submit" class="btn btn-danger">
+                      <i class="fas fa-check-circle me-2"></i>Mark as Sold
+                    </button>
+                  </form>
+                {% endif %}
                 <a href="{% url 'products:product_edit' product.slug %}" class="btn btn-warning"><i class="fas fa-edit me-2"></i>Edit Product</a>
               {% endif %}
             {% else %}
-              <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg"><i class="fas fa-sign-in-alt me-2"></i>Login to Chat with Seller</a>
+              {% if product.status == 'sold' %}
+                <div class="alert alert-danger text-center">
+                  <i class="fas fa-times-circle me-2"></i>This item has been sold
+                </div>
+              {% else %}
+                <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg"><i class="fas fa-sign-in-alt me-2"></i>Login to Chat with Seller</a>
+              {% endif %}
             {% endif %}
           </div>
 
@@ -139,6 +173,39 @@
             <p class="card-text">{{ product.description|linebreaks }}</p>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+      <div class="row mt-5">
+        <div class="col-12">
+          <h4 class="mb-4">Related Products</h4>
+          <div class="row">
+            {% for related in related_products %}
+              <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                  <a href="{{ related.get_absolute_url }}" class="text-decoration-none">
+                    {% if related.main_image %}
+                      <img src="{{ related.main_image }}" alt="{{ related.title }}" class="card-img-top" style="height: 120px; object-fit: cover;" />
+                    {% else %}
+                      <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 120px;">
+                        <i class="fas fa-image text-muted"></i>
+                      </div>
+                    {% endif %}
+                    <div class="card-body p-2">
+                      <h6 class="card-title text-dark small">{{ related.title|truncatechars:30 }}</h6>
+                      <p class="text-success fw-bold small mb-0">₹{{ related.price }}</p>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
       </div>
     </div>
 
